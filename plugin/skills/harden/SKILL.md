@@ -52,7 +52,8 @@ commentary.
 run the `modernize-harden-scan` dynamic workflow with args `{ "system": "<system>" }`. This skill is your
 authorization to run it. **Tell the user the agent count as a formula, 5 + N + M**: 5 finders, N refuters (one per
 distinct finding), M second judges (one per finding still Critical or High after refutation); N and M are known
-only once the finders return. Runs start in the background. Wait for the result, then continue from it. To resume
+only once the finders return. Call it "about 5 + N + M": Copilot retries an agent whose structured answer
+doesn't parse, so a run can use a few more. Runs start in the background. Wait for the result, then continue from it. To resume
 a stopped run, open `/workflows` and resume it there.
 
 Args:

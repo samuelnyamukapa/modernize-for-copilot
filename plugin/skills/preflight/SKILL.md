@@ -150,7 +150,14 @@ present; presence is not proof:
 - **Level 2, any stack with a build system:** restore and build ONE whole small
   project the way 3a says CI does. A one-file compile misses private feeds,
   code generation, shared props and pinned SDKs — where large codebases hide
-  their surprises.
+  their surprises. Restore and build write next to the project (`obj/`, `bin/`,
+  `packages/`, `target/`, `node_modules/`), so do it in a scratch copy, never
+  inside `legacy/<system>`: copy the project and whatever it references
+  (solution file, shared props, sibling projects) into a scratch directory as
+  below, keeping their relative layout. On POSIX use `cp -RH` or
+  `rsync -a src/ dest/` (a plain `cp -r` of a link copies the link, not the code);
+  in PowerShell, `Copy-Item -Recurse` or `robocopy /E`. The guard blocks
+  build tools pointed at `legacy/`.
 
 A failed smoke test is the most valuable output of this command: report the
 actual error and diagnose it (missing copybook or include path, missing dialect

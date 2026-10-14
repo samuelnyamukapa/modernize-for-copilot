@@ -53,6 +53,22 @@ WRITE_VERBS = {
 COPY_VERBS = {"cp", "copy", "copy-item", "cpi", "xcopy", "robocopy", "rsync", "scp"}
 CD_VERBS = {"cd", "pushd", "set-location", "sl", "chdir"}
 GIT_WRITE = {"apply", "checkout", "restore", "reset", "clean", "stash", "am", "rm", "mv", "switch", "merge", "rebase", "pull", "commit"}
+# Build and migration tools write next to the project they are pointed at (obj/, bin/, target/,
+# node_modules/, packages/, or the project files themselves). Pointed at legacy, they are writes.
+# Tools listed with subcommands write only for those (`dotnet list` and `upgrade-assistant analyze`
+# don't); the rest always do. Compilers are left out: `cobc -fsyntax-only` and `gcc -fsyntax-only`
+# are preflight's read-only smoke test, and their default output goes to the current folder.
+BUILD_SUBCOMMANDS = {
+    "dotnet": {"restore", "build", "test", "publish", "run", "clean", "pack", "add", "remove", "new", "format",
+               "msbuild", "sln", "migrate", "vstest", "ef", "watch"},
+    "nuget": {"restore", "install", "update", "pack", "add", "init"},
+    "npm": {"install", "i", "ci", "add", "run", "run-script", "build", "test", "update", "up", "rebuild", "exec", "x", "init"},
+    "yarn": {"install", "add", "run", "build", "test", "upgrade", "up", "exec", "init"},
+    "pnpm": {"install", "i", "add", "run", "build", "test", "update", "up", "rebuild", "exec", "init"},
+    "upgrade-assistant": {"upgrade"},
+    "ng": {"update", "build", "test", "add", "generate", "g"},
+}
+BUILD_ALWAYS = {"msbuild", "mvn", "mvnw", "gradle", "gradlew", "make", "ant", "try-convert"}
 INLINE_WRITE = re.compile(r"""open\s*\([^)]*['"][wax+]|\.write|write_text|write_bytes|unlink\(|remove\(|rename\(|replace\(|shutil\.|WriteAll|AppendAll|File\.Delete|File\.Move""", re.I)
 
 
@@ -236,9 +252,10 @@ def shell_violation(command: str, ws: str, roots: list[str], cwd: str | None) ->
         toks = _tokens(segment.strip())
         if not toks:
             continue
-        verb = os.path.basename(toks[0]).lower()
-        if verb.endswith(".exe"):
-            verb = verb[:-4]
+        verb = os.path.basename(toks[0].replace("\\", "/")).lower()
+        for ext in (".exe", ".cmd", ".bat"):
+            if verb.endswith(ext):
+                verb = verb[: -len(ext)]
         args = [t for t in toks[1:] if not t.startswith("-") and not re.match(r"^/[A-Za-z]{1,3}$", t)]
         if verb in CD_VERBS and args:
             root = hit(_rel(args[0], base), ws, roots)
@@ -268,9 +285,23 @@ def shell_violation(command: str, ws: str, roots: list[str], cwd: str | None) ->
             return target_root
         if verb == "git" and _git_subcommand(toks) in GIT_WRITE:
             return target_root
+        if _builds(verb, toks):
+            return target_root
         if INLINE_WRITE.search(segment):
             return target_root
     return None
+
+
+def _builds(verb: str, toks: list[str]) -> bool:
+    if verb in BUILD_ALWAYS:
+        return True
+    subs = BUILD_SUBCOMMANDS.get(verb)
+    if subs is None:
+        return False
+    words = [t.lower() for t in toks[1:] if not t.startswith("-")]
+    if verb == "yarn" and not words:
+        return True  # a bare `yarn` installs
+    return any(w in subs for w in words)
 
 
 def _git_subcommand(toks: list[str]) -> str:
@@ -396,6 +427,17 @@ def self_test() -> list[str]:
             ("bash", {"command": "rm -rf modernized/billing && mkdir modernized/billing"}, False),
             ("bash", {"command": "touch PAY.cbl", "cwd": os.path.join(ws, "legacy", "billing")}, True),
             ("bash", {"command": "dotnet build modernized/billing-uplifted"}, False),
+            ("bash", {"command": "cp -RH legacy/billing modernized/billing-uplifted"}, False),
+            ("bash", {"command": "dotnet restore legacy/billing/Billing.sln"}, True),
+            ("bash", {"command": "cd legacy/billing && dotnet build"}, True),
+            ("powershell", {"command": "& msbuild.exe legacy\\billing\\Billing.sln /t:Build"}, True),
+            ("powershell", {"command": "nuget.exe restore legacy\\billing\\Billing.sln"}, True),
+            ("bash", {"command": "mvn -f legacy/billing/pom.xml package"}, True),
+            ("bash", {"command": "npm --prefix legacy/billing ci"}, True),
+            ("bash", {"command": "dotnet list legacy/billing/Billing.csproj package --outdated"}, False),
+            ("bash", {"command": "upgrade-assistant analyze legacy/billing/Billing.sln --report modernized/ua.sarif"}, False),
+            ("bash", {"command": "upgrade-assistant upgrade legacy/billing/Billing.csproj"}, True),
+            ("bash", {"command": "cobc -fsyntax-only legacy/billing/PAY.cbl"}, False),
             ("bash", {"command": "mkdir -p legacy && ln -s /work/payroll legacy/payroll"}, False),
             ("bash", {"command": "ln -s /work/other legacy/billing"}, True),
             ("bash", {"command": "mkdir legacy/billing/newdir"}, True),

@@ -367,3 +367,13 @@ There is one milestone per phase. Labels: `phase-0` … `phase-6`, `needs-sam` (
 - `$ARGUMENTS` **is** substituted in skills invoked as slash commands. It is not substituted when a skill is invoked from plain language, so skills read both.
 - The guard resolves paths against the hook input's `cwd`. It handles `apply_patch`, `powershell` and `bash`.
 - See [SPIKE.md](SPIKE.md) for the evidence.
+
+## Update, 14 Oct 2026 (Phases 4 and 5 code complete)
+
+- **Phase 3a verified on Windows** (eShopLegacyMVC, Copilot CLI): `start`, `preflight`, `assess` and `map` produced every expected artifact. `extract-rules` onwards is being smoke-tested now.
+- **Phase 4:** all six upstream workflows are ported to `com.github.copilot/extensions/modernize-workflows/`, one module each, registered by `extension.mjs`: `modernize-portfolio-assess`, `modernize-extract-rules-mine`, `modernize-harden-scan`, `modernize-uplift-deltas`, `modernize-uplift-migrate`, `modernize-reimagine-scaffold`. 96 Node tests run them against a mock `ctx` (memoised `ctx.agent`, null on failure), and CI runs them on Linux and Windows.
+  - A definition the runtime rejects is skipped; the other five still register, and the skill falls back to direct subagents.
+  - `extract-rules` keeps upstream's 1000-call cap in its own counter and declares `maxTotalSubagents: 2000`, because a schema retry spawns twice and both count.
+- **Phase 5:** `/modernize:uplift` is written (pilot, playbook, batches, circuit breaker, proof pack); `/modernize:reimagine` was already in.
+- **Guard:** build and migration tools pointed at `legacy/` (`dotnet restore|build|test`, `msbuild`, `nuget restore`, `mvn`, `gradle`, `npm ci`, `upgrade-assistant upgrade` …) are now denied as writes. Read-only uses (`dotnet list`, `upgrade-assistant analyze`, `cobc -fsyntax-only`) stay allowed. Preflight's Level 2 build smoke test now says to build in a scratch copy.
+- **Still unverified on a real install:** that Copilot accepts the `anyOf` root in four `argsSchema`s (the documented subset includes `anyOf`, and the per-module tests check every keyword against it), and the whole `--experimental` path end to end.

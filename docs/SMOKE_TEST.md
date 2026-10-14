@@ -88,3 +88,11 @@ After each step, tell Claude "B*n* done". Claude reads `D:\githubProjects\modern
 ## Part C (later): rules, plan, build, proof
 
 `/modernize:extract-rules eshop` → `/modernize:review eshop` → `/modernize:brief eshop ".NET 8"` → `/modernize:uplift …` → `/modernize:verify eshop`.
+
+## Part D (later): dynamic workflows
+
+Start the test window with `copilot --experimental` (or run `/experimental on` in an open session), then:
+
+1. `/workflows` should list six `modernize-…` workflows. If it lists fewer, screenshot it: a definition was rejected.
+2. Re-run `/modernize:extract-rules eshop`. It should say it is using the `modernize-extract-rules-mine` workflow (Method A) and show progress in `/workflows`.
+3. `/modernize:harden eshop` runs `modernize-harden-scan`; `/modernize:uplift` runs `modernize-uplift-deltas` and later `modernize-uplift-migrate`.

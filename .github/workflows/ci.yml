@@ -19,6 +19,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - name: Guard self-test
         run: python plugin/tools/guard.py --self-test
       - name: Lint plugin structure
@@ -35,3 +38,6 @@ jobs:
       - name: Script tests
         if: always()
         run: python convert/ci_tests.py plugin/scripts/tests
+      - name: Dynamic workflow tests
+        if: always()
+        run: node --test "plugin/tools/tests/workflows/*.test.mjs"
