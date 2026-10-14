@@ -22,3 +22,14 @@ Copilot CLI 1.0.97 on Windows 11, model Auto (`gpt-6-luna`), 14 Oct 2026. The pr
 4. **Agents** are referenced as `<plugin>:<agent>` everywhere, in skills and in workflows.
 5. **Dynamic workflows** are the primary fan-out path. The direct-subagent fallback stays for sessions without `--experimental`.
 6. **Install** is from the marketplace. Git on `PATH` is a documented prerequisite.
+
+## Phase 2 verification (Windows, Copilot CLI 1.0.97)
+
+- `doctor` through the plugin's MCP server: exactly one entry served tools (`modernize-tools-win`, `py -3` → Python 3.13.2). Guard self-test passed on the machine.
+- The main agent's `Edit` on `legacy/probe/target.txt` was **denied** by the plugin hook: *"modernize guard: legacy is read-only legacy source…"*. The file was unchanged.
+
+## Install gotchas found on Windows
+
+1. **Two plugins installed from the same local folder share one install directory** (`installed-plugins\_direct\<source-folder-name>`). Uninstalling one deletes the other's files, and the survivor still shows in `copilot plugin list`. Install from the marketplace, or uninstall before reinstalling.
+2. **`copilot plugin uninstall` fails while any Copilot session is open** ("being used by another process"). Close sessions first.
+3. **`git` must be on `PATH`** for marketplace installs. GitHub Desktop's bundled git is not on `PATH`.

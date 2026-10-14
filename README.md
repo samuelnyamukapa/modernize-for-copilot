@@ -57,6 +57,13 @@ Commands are typed as `/modernize:<step> <system>`, for example `/modernize:asse
 - `git` on `PATH`, which Copilot needs to install plugins from a marketplace.
 - For the fan-out commands, Copilot dynamic workflows (`--experimental`). Without them, the commands fall back to direct subagents.
 
+## Troubleshooting
+
+- **`Unknown command: /assess`**: plugin skills are namespaced. Type `/modernize:assess`.
+- **Uninstall fails with "being used by another process"**: close every Copilot session, then retry.
+- **Edits to `legacy/` aren't blocked**: run `copilot plugin list`, and reinstall if you installed two plugins from the same local folder (they share an install directory). Ask Copilot to *call the modernize-tools doctor tool*. It should report `guard_self_test: pass`.
+- **Marketplace add fails with "git is not installed"**: install Git for Windows (`winget install --id Git.Git -e`) and reopen the terminal.
+
 ## Repository layout
 
 | Path | What |
