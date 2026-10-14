@@ -106,7 +106,9 @@ Exit criteria:
   delivery estimate (agentic work does not follow human-team productivity).
 - **Criteria are conditions, never states.** "All P0 rules in Phase 1 proven equivalent" is a
   criterion; "P0 rules proven" is a claim. Make entry criteria *checkable preconditions* ("baseline
-  recorded in `analysis/<system>/BASELINE.md`", "pilot playbook approved"). The build commands read the
+  recorded in `analysis/<system>/BASELINE.md`", "pilot playbook approved"). Name the build commands'
+  files exactly as they write them: `BASELINE.md`, `PLAYBOOK.md` (never another name: the fan-out
+  stops when `analysis/<system>/PLAYBOOK.md` is missing), `DELTA_CATALOG.md`. The build commands read the
   brief and treat them as binding, and they may tick a box or add a note but never reword a criterion:
   a proposed change goes on a `Proposed revision:` line for the approver. Tell the approver they steer
   execution by editing this file: an edited criterion is honored, a chat message is not.

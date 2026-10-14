@@ -317,7 +317,10 @@ outputs are mandatory before any other unit is touched:
   migration: the ordered edits for one unit; every error and its fix; every environment fact you had to
   *discover* (the toolchain version really in use, how dependency binaries resolve, which shared config
   governs the build); the exact build command that proves a unit done. Write it for an engineer who has
-  not read this conversation: the fan-out agents are exactly that. Never a credential value.
+  not read this conversation: the fan-out agents are exactly that. Never a credential value. Use exactly that
+  file name even if the brief names the playbook differently (an older brief may say `UPLIFT_PLAYBOOK.md`):
+  the fan-out and the `modernize:uplift-migrator` agent read only `PLAYBOOK.md`. Tick the brief's criterion
+  with a note naming the file you wrote.
 
 Then **stop and show** the pilot's diff, what it added to the catalog and the playbook, and **wait for
 approval before any fan-out**. If the pilot changed the picture (a missed prerequisite, a phase in the
