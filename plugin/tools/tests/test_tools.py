@@ -65,6 +65,14 @@ class ServerTest(unittest.TestCase):
         self.assertTrue(err)
         self.assertIn("folder name", text)
 
+    def test_dotted_module_names_are_accepted_but_not_traversal(self):
+        text, _ = self.client.tool("proof_pack", workspace=self.ws, system="billing", module="Contoso.Billing.Api")
+        self.assertIn("proof_pack.py billing Contoso.Billing.Api", text)
+        text, err = self.client.tool("proof_pack", workspace=self.ws, system="billing", module="..")
+        self.assertTrue(err)
+        text, err = self.client.tool("trace_rules", workspace=self.ws, system="billing", module="a..b")
+        self.assertTrue(err)
+
     def test_paths_must_stay_in_workspace(self):
         text, err = self.client.tool("compare", workspace=self.ws, cases="../../outside.json")
         self.assertTrue(err)

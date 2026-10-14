@@ -34,6 +34,8 @@ OUTPUT_CAP = 60_000
 TIMEOUT_S = 900
 
 SYSTEM_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
+# Module folders may contain dots (.NET projects such as Contoso.Billing.Api), never "..".
+MODULE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 
 
 class ToolError(Exception):
@@ -61,6 +63,15 @@ def system_of(args: dict, key: str = "system", required: bool = True) -> str | N
         return None
     if not isinstance(value, str) or not SYSTEM_RE.match(value):
         raise ToolError(f"`{key}` must be a folder name of letters, digits, '-' and '_' (got {value!r}).")
+    return value
+
+
+def module_of(args: dict) -> str | None:
+    value = args.get("module")
+    if value in (None, ""):
+        return None
+    if not isinstance(value, str) or not MODULE_RE.match(value) or ".." in value:
+        raise ToolError(f"`module` must be a folder name of letters, digits, '.', '-' and '_' (got {value!r}).")
     return value
 
 
@@ -183,7 +194,7 @@ def t_trace_rules(a):
         argv.append("--json")
     if flag(a, "all"):
         argv.append("--all")
-    module = system_of(a, "module", required=False)
+    module = module_of(a)
     if module:
         argv += ["--module", module]
     for r in paths_in(ws, a.get("results"), "results"):
@@ -222,7 +233,7 @@ def t_uplift_checks(a):
 def t_proof_pack(a):
     ws, system = workspace_of(a), system_of(a)
     argv = [system]
-    module = system_of(a, "module", required=False)
+    module = module_of(a)
     if module:
         argv.append(module)
     return run_script("proof_pack.py", argv, ws)
