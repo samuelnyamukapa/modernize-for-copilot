@@ -22,13 +22,16 @@ jobs:
       - name: Guard self-test
         run: python plugin/tools/guard.py --self-test
       - name: Lint plugin structure
+        if: always()
         run: python convert/lint.py
       - name: Converter is up to date with the pinned upstream
         if: runner.os == 'Linux'
         run: |
           python convert/sync.py
           git diff --exit-code -- plugin/scripts plugin/assets plugin/com.github.copilot/agents convert/upstream-snapshot
-      - name: Script tests
-        run: python -m unittest discover -s plugin/scripts/tests
       - name: MCP server and guard tests
-        run: python -m unittest discover -s plugin/tools/tests
+        if: always()
+        run: python convert/ci_tests.py plugin/tools/tests
+      - name: Script tests
+        if: always()
+        run: python convert/ci_tests.py plugin/scripts/tests
