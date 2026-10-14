@@ -5,10 +5,13 @@
 ## Setup (Windows, PowerShell)
 
 ```powershell
+copilot plugin marketplace add samuelnyamukapa/modernize-for-copilot
+copilot plugin install modernize-probe@modernize-for-copilot
 cd <repo>\spike\workspace
-copilot plugin install ..\probe-plugin
 copilot --experimental
 ```
+
+Don't use a relative path such as `copilot plugin install ..\probe-plugin`. Copilot CLI 1.0.97 reads `..\probe-plugin` as a GitHub `owner/repo` and the install fails. A full path works, but direct path installs are deprecated, so use the marketplace.
 
 `workspace\legacy\probe\target.txt` stands in for legacy code. The guard hook should stop any edit to it.
 
