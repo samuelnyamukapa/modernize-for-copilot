@@ -24,9 +24,10 @@ FORBIDDEN = [
     (re.compile(r"\bAskUserQuestion\b"), "use the ask_user tool"),
     (re.compile(r"Workflow tool"), "refer to Copilot dynamic workflows"),
     (re.compile(r"\.claude/settings"), "Copilot does not read Claude permission rules; use the guard hook"),
-    (re.compile(r"/code-modernization:"), "skills are invoked as /modernize-<verb>"),
+    (re.compile(r"/code-modernization:"), "skills are invoked as /modernize:<verb>"),
+    (re.compile(r"(?<![\w:])/modernize-[a-z]"), "skills are invoked as /modernize:<verb>, not /modernize-<verb>"),
+    (re.compile(r"['\"]code-modernization:"), "agents are named modernize:<agent>"),
     (re.compile(r"\bEnterPlanMode\b|\bExitPlanMode\b"), "say 'stop and wait for explicit approval'"),
-    (re.compile(r"\$ARGUMENTS\b"), "skills receive no $ARGUMENTS substitution; parse the user's message"),
 ]
 
 AGENT_KEYS = {"name", "description", "tools", "model", "target", "user-invocable",

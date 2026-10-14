@@ -358,3 +358,12 @@ There is one milestone per phase. Labels: `phase-0` … `phase-6`, `needs-sam` (
 2. **Phase 0.** Do you want to run the spike yourself, or should I drive Copilot on your computer through computer use?
 3. **Copilot plan.** Confirm your Copilot plan supports Dynamic Workflows; Pro/Pro+ on a legacy annual plan doesn't.
 4. **Visibility.** Public or private repo to start.
+
+---
+
+## Update, 14 Oct 2026 (after the Phase 0 spike)
+
+- The plugin is named **`modernize`**. Skills are invoked as `/modernize:<step>`, e.g. `/modernize:assess billing`. The front door is `/modernize:start`. Agents are referenced as `modernize:<agent>`.
+- `$ARGUMENTS` **is** substituted in skills invoked as slash commands. It is not substituted when a skill is invoked from plain language, so skills read both.
+- The guard resolves paths against the hook input's `cwd`. It handles `apply_patch`, `powershell` and `bash`.
+- See [SPIKE.md](SPIKE.md) for the evidence.

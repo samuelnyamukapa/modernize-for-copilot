@@ -1,6 +1,6 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
-  "name": "modernize-for-copilot",
+  "name": "modernize",
   "version": "0.1.0-dev",
   "description": "Guided legacy-code modernization for GitHub Copilot: assess, map, mine business rules, plan, then upgrade, rewrite or rebuild with independent proof that the new code behaves like the old. A community port of Anthropic's code-modernization plugin.",
   "author": {
@@ -10,5 +10,14 @@
   "homepage": "https://github.com/samuelnyamukapa/modernize-for-copilot",
   "repository": "https://github.com/samuelnyamukapa/modernize-for-copilot",
   "license": "Apache-2.0",
-  "keywords": ["modernization", "legacy", "cobol", "dotnet", "java", "migration", "uplift", "business-rules"]
+  "keywords": [
+    "modernization",
+    "legacy",
+    "cobol",
+    "dotnet",
+    "java",
+    "migration",
+    "uplift",
+    "business-rules"
+  ]
 }

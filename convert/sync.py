@@ -62,7 +62,8 @@ NOT_USER_INVOCABLE = {"uplift-migrator", "scaffolder"}
 
 # Text rewrites applied to agent bodies. Each must change Claude-specific wording only.
 BODY_REWRITES = [
-    (re.compile(r"/code-modernization:(modernize-[a-z-]+)"), r"/\1"),
+    (re.compile(r"/code-modernization:modernize-([a-z-]+)"), r"/modernize:\1"),
+    (re.compile(r"/code-modernization:modernize\b"), "/modernize:start"),
     (
         re.compile(
             r"Use the \*\*Write/Edit tools\*\* for every file change — they are what the\s+"

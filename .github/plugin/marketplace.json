@@ -8,7 +8,7 @@
   },
   "plugins": [
     {
-      "name": "modernize-for-copilot",
+      "name": "modernize",
       "source": "./plugin",
       "version": "0.1.0-dev",
       "description": "Assess, map, mine business rules, plan, then upgrade, rewrite or rebuild legacy code with proof of behavioural equivalence.",

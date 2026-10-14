@@ -23,19 +23,19 @@ preflight → assess → map → extract-rules → brief → (reimagine | transf
 
 | Skill | What it does |
 |---|---|
-| `/modernize` | Front door: asks what you want done and gives the first step |
-| `/modernize-preflight` | Checks the environment and records where the code lives |
-| `/modernize-assess` | Inventory, complexity, debt, security and a recommended pattern |
-| `/modernize-map` | Dependencies, data flow, entry points and business flows, as an interactive map |
-| `/modernize-extract-rules` | Business rules as testable Given/When/Then cards with `file:line` citations |
-| `/modernize-review` | A person confirms or corrects the rules that need judgement |
-| `/modernize-brief` | The phased plan a steering committee approves (human approval gate) |
-| `/modernize-transform` | Rewrite one module in a new stack, with equivalence tests |
-| `/modernize-uplift` | Same-stack version move (e.g. .NET Framework 4.8 → .NET 8), with minimal diffs |
-| `/modernize-reimagine` | Greenfield rebuild from the extracted intent |
-| `/modernize-verify` | Independent proof: one verdict per module |
-| `/modernize-harden` | Security scan of the legacy system with a reviewable patch |
-| `/modernize-status` | Where you are and the next step |
+| `/modernize:start` | Front door: asks what you want done and gives the first step |
+| `/modernize:preflight` | Checks the environment and records where the code lives |
+| `/modernize:assess` | Inventory, complexity, debt, security and a recommended pattern |
+| `/modernize:map` | Dependencies, data flow, entry points and business flows, as an interactive map |
+| `/modernize:extract-rules` | Business rules as testable Given/When/Then cards with `file:line` citations |
+| `/modernize:review` | A person confirms or corrects the rules that need judgement |
+| `/modernize:brief` | The phased plan a steering committee approves (human approval gate) |
+| `/modernize:transform` | Rewrite one module in a new stack, with equivalence tests |
+| `/modernize:uplift` | Same-stack version move (e.g. .NET Framework 4.8 → .NET 8), with minimal diffs |
+| `/modernize:reimagine` | Greenfield rebuild from the extracted intent |
+| `/modernize:verify` | Independent proof: one verdict per module |
+| `/modernize:harden` | Security scan of the legacy system with a reviewable patch |
+| `/modernize:status` | Where you are and the next step |
 
 Specialist custom agents do the heavy reading and checking: `legacy-analyst`, `business-rules-extractor`, `architecture-critic`, `security-auditor`, `test-engineer`, `version-delta-analyst`, `uplift-migrator` and `scaffolder`.
 
@@ -45,13 +45,16 @@ Copilot CLI:
 
 ```sh
 copilot plugin marketplace add samuelnyamukapa/modernize-for-copilot
-copilot plugin install modernize-for-copilot@modernize-for-copilot
+copilot plugin install modernize@modernize-for-copilot
 ```
 
 Copilot app: add the same marketplace, then install the plugin from it.
 
+Commands are typed as `/modernize:<step> <system>`, for example `/modernize:assess billing`.
+
 **Requirements:**
 - Python 3.9+ on `PATH`. The bundled scripts use the standard library only.
+- `git` on `PATH`, which Copilot needs to install plugins from a marketplace.
 - For the fan-out commands, Copilot dynamic workflows (`--experimental`). Without them, the commands fall back to direct subagents.
 
 ## Repository layout
