@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "cd \"${PLUGIN_ROOT:-.}\" 2>/dev/null; if command -v python3 >/dev/null 2>&1; then exec python3 tools/guard.py; elif command -v python >/dev/null 2>&1; then exec python tools/guard.py; fi",
+        "powershell": "if ($env:PLUGIN_ROOT) { Set-Location -LiteralPath $env:PLUGIN_ROOT }; $f = [IO.Path]::GetTempFileName(); [IO.File]::WriteAllText($f, [Console]::In.ReadToEnd(), [Text.UTF8Encoding]::new($false)); try { if (Get-Command py -ErrorAction SilentlyContinue) { & py -3 tools\\guard.py --input $f } elseif (Get-Command python -ErrorAction SilentlyContinue) { & python tools\\guard.py --input $f } elseif (Get-Command python3 -ErrorAction SilentlyContinue) { & python3 tools\\guard.py --input $f } } finally { Remove-Item -LiteralPath $f -ErrorAction SilentlyContinue }",
+        "timeoutSec": 15
+      }
+    ]
+  }
+}

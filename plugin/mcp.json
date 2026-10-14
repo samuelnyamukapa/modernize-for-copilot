@@ -1,0 +1,24 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "modernize-tools": {
+      "type": "stdio",
+      "command": "python3",
+      "args": [
+        "${PLUGIN_ROOT}/tools/server.py",
+        "--entry",
+        "posix"
+      ]
+    },
+    "modernize-tools-win": {
+      "type": "stdio",
+      "command": "py",
+      "args": [
+        "-3",
+        "${PLUGIN_ROOT}/tools/server.py",
+        "--entry",
+        "windows"
+      ]
+    }
+  }
+}

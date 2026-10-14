@@ -10,17 +10,25 @@ permissions:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Guard self-test
+        run: python plugin/tools/guard.py --self-test
       - name: Lint plugin structure
-        run: python3 convert/lint.py
+        run: python convert/lint.py
       - name: Converter is up to date with the pinned upstream
+        if: runner.os == 'Linux'
         run: |
-          python3 convert/sync.py
+          python convert/sync.py
           git diff --exit-code -- plugin/scripts plugin/assets plugin/com.github.copilot/agents convert/upstream-snapshot
       - name: Script tests
-        run: python3 -m unittest discover -s plugin/scripts/tests
+        run: python -m unittest discover -s plugin/scripts/tests
+      - name: MCP server and guard tests
+        run: python -m unittest discover -s plugin/tools/tests
