@@ -114,6 +114,34 @@ class ServerTest(unittest.TestCase):
         self.assertIn("result", self.client.call("ping"))
 
 
+class ScriptPatchTest(unittest.TestCase):
+    """convert/sync.py SCRIPT_PATCHES: fixes applied on top of the upstream scripts."""
+
+    def render(self, skipped):
+        ws = tempfile.mkdtemp()
+        try:
+            os.makedirs(os.path.join(ws, "analysis", "billing"))
+            rule = {"name": "Late fee is 5%", "category": "Calculation", "priority": "P0",
+                    "source": "src/Fees.cs:10-12", "plainEnglish": "x", "given": "g", "when": "w", "then": "t",
+                    "confidence": "High"}
+            result = {"confirmedRules": [rule], "rejectedRules": [], "dataObjects": [],
+                      "stats": {"skippedPhases": skipped}}
+            with open(os.path.join(ws, "analysis", "billing", "rules_result.json"), "w") as fh:
+                json.dump(result, fh)
+            subprocess.run([sys.executable, os.path.join(PLUGIN, "scripts", "render_rules.py"), "billing",
+                            "--workspace", ws], check=True, capture_output=True, cwd=ws)
+            with open(os.path.join(ws, "analysis", "billing", "BUSINESS_RULES.md"), encoding="utf-8") as fh:
+                return fh.read()
+        finally:
+            shutil.rmtree(ws, ignore_errors=True)
+
+    def test_rules_header_claims_a_referee_only_when_one_ran(self):
+        self.assertIn("checked by a second agent", self.render([]))
+        text = self.render(["referee", "p0-panel"])
+        self.assertNotIn("checked by a second agent", text)
+        self.assertIn("No referee agent checked these citations", text)
+
+
 class StandDownTest(unittest.TestCase):
     def test_windows_entry_serves_nothing_off_windows(self):
         if os.name == "nt":

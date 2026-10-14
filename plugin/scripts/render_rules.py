@@ -115,8 +115,11 @@ def main(argv):
     doc = [f'# Business Rules — {one_line(system, 80)}', '',
            f"At extraction: {len(rules)} confirmed rules ({sum(1 for r in rules if r.get('priority') == 'P0')} P0); "
            f"later steps may add or correct rules below. "
-           f"Each citation was checked by a second agent that read the cited lines; "
-           f"{len(result.get('rejectedRules') or [])} candidate rules were refuted and left out.", '',
+           + (f"Each citation was checked by a second agent that read the cited lines; "
+              f"{len(result.get('rejectedRules') or [])} candidate rules were refuted and left out."
+              if 'referee' not in (stats.get('skippedPhases') or []) else
+              "No referee agent checked these citations (the referee pass did not run): "
+              "treat each one as unconfirmed until /modernize:review or a person reads the cited lines."), '',
            '| ID | Name | Category | Priority | Source | Confidence |', '|---|---|---|---|---|---|']
     for n, r in numbered:
         doc.append(f"| RULE-{n:03d} | {one_line(r.get('name'), 80)} | {one_line(r.get('category'), 20)} | "

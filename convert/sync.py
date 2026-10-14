@@ -57,6 +57,27 @@ TOOL_MAP = {
     "TodoWrite": "todo",
 }
 
+# Small fixes to upstream scripts: (file under scripts/, exact old text, new text). A patch whose old
+# text is missing fails the sync, so upstream drift is noticed rather than silently dropped.
+SCRIPT_PATCHES = [
+    (
+        # The header claimed a referee checked every citation even when the referee pass did not run
+        # (extract-rules Method B, or a run cut short). Say so instead.
+        "render_rules.py",
+        """           f"later steps may add or correct rules below. "
+           f"Each citation was checked by a second agent that read the cited lines; "
+           f"{len(result.get('rejectedRules') or [])} candidate rules were refuted and left out.", '',
+""",
+        """           f"later steps may add or correct rules below. "
+           + (f"Each citation was checked by a second agent that read the cited lines; "
+              f"{len(result.get('rejectedRules') or [])} candidate rules were refuted and left out."
+              if 'referee' not in (stats.get('skippedPhases') or []) else
+              "No referee agent checked these citations (the referee pass did not run): "
+              "treat each one as unconfirmed until /modernize:review or a person reads the cited lines."), '',
+""",
+    ),
+]
+
 # Agents that must only run inside an orchestrated batch, never picked by a person.
 NOT_USER_INVOCABLE = {"uplift-migrator", "scaffolder"}
 
@@ -170,6 +191,14 @@ def main() -> int:
             upstream_version = json.load(fh).get("version", "unknown")
 
         copy_tree(os.path.join(src, "scripts"), os.path.join(PLUGIN, "scripts"), DROP_SCRIPTS)
+        for name, before, after in SCRIPT_PATCHES:
+            path = os.path.join(PLUGIN, "scripts", name)
+            with open(path, encoding="utf-8") as fh:
+                text = fh.read()
+            if text.count(before) != 1:
+                raise ValueError(f"script patch for {name} no longer applies: upstream changed it")
+            with open(path, "w", encoding="utf-8", newline="\n") as fh:
+                fh.write(text.replace(before, after))
         copy_tree(os.path.join(src, "assets"), os.path.join(PLUGIN, "assets"), DROP_ASSETS)
 
         agents_dst = os.path.join(PLUGIN, "com.github.copilot", "agents")
