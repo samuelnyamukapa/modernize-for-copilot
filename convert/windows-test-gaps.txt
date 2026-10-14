@@ -1,0 +1,10 @@
+# Upstream script tests that cannot run on Windows because of the test fixture itself,
+# not the product. Generated from upstream on every sync, so they are skipped here rather
+# than edited. One test id prefix per line, then " | " and the reason.
+test_proof_tools.UpliftChecks.test_a_hostile_file_name_is_cleaned | fixture file name contains ESC and newline, which Windows forbids
+test_proof_rules_run.HostileInput.test_hostile_file_names_and_lines_stay_inside_the_p0_table | fixture file name contains '|', which Windows forbids
+test_proof_rules_run.HostileInput.test_a_hostile_tooling_folder_name_stays_one_plain_list_item | fixture folder name contains newline and '|', which Windows forbids
+test_rules_tools.ShardTests.test_a_link_to_the_home_directory_or_root_is_refused | fixture symlinks to '/' and '/usr', which do not exist on Windows and need symlink privilege
+test_proof_tools.BaselineEvidence.test_the_baseline_folder_and_recorded_lines_are_the_only_places | test compares os.path.relpath output (backslashes on Windows) to '/' strings
+test_report_tools.TemplateScript | reads node's UTF-8 stdout with text=True, which decodes with the Windows code page and fails
+test_proof_tools.ProofScript | reads node's UTF-8 stdout with text=True, which decodes with the Windows code page and fails

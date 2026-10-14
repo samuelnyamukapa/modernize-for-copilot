@@ -1,0 +1,8 @@
+# Keep the plugin byte-identical on every OS. Windows checkouts would otherwise
+# convert line endings, which changes vendored files (mermaid.min.js has a recorded
+# SHA-256) and the bytes the equivalence scripts compare.
+* text=auto eol=lf
+*.min.js -text
+*.png binary
+*.jpg binary
+*.gif binary
