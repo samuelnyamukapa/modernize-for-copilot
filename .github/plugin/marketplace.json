@@ -14,7 +14,22 @@
       "description": "Assess, map, mine business rules, plan, then upgrade, rewrite or rebuild legacy code with proof of behavioural equivalence.",
       "license": "Apache-2.0",
       "category": "development",
-      "keywords": ["modernization", "legacy", "cobol", "dotnet", "java", "migration"]
+      "keywords": [
+        "modernization",
+        "legacy",
+        "cobol",
+        "dotnet",
+        "java",
+        "migration"
+      ]
+    },
+    {
+      "name": "modernize-probe",
+      "source": "./spike/probe-plugin",
+      "version": "0.0.1",
+      "description": "Throwaway spike probe for modernize-for-copilot development. Not for general use.",
+      "license": "Apache-2.0",
+      "category": "development"
     }
   ]
 }
