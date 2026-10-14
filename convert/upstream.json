@@ -1,0 +1,7 @@
+{
+  "repo": "https://github.com/anthropics/claude-plugins-official.git",
+  "path": "plugins/code-modernization",
+  "sha": "8bd00f08f0b04705e610cf132fbe2cf5ec44cfe3",
+  "version": "1.0.0",
+  "pinned": "2026-10-14"
+}

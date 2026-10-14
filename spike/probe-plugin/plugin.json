@@ -1,0 +1,7 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "modernize-probe",
+  "version": "0.0.1",
+  "description": "Throwaway probe that checks which Copilot plugin features modernize-for-copilot can rely on. Uninstall after the spike.",
+  "license": "Apache-2.0"
+}

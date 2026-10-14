@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "bash": "in=$(cat); printf 'START %s PLUGIN_ROOT=%s COPILOT_PLUGIN_ROOT=%s CLAUDE_PLUGIN_ROOT=%s CWD=%s INPUT=%s\\n' \"$(date -u +%FT%TZ)\" \"$PLUGIN_ROOT\" \"$COPILOT_PLUGIN_ROOT\" \"$CLAUDE_PLUGIN_ROOT\" \"$PWD\" \"$in\" >> \"${TMPDIR:-/tmp}/modernize-probe-hook.log\"",
+        "powershell": "$in = [Console]::In.ReadToEnd(); $log = Join-Path $env:TEMP 'modernize-probe-hook.log'; Add-Content -Path $log -Value (\"START \" + (Get-Date -Format o) + \" PLUGIN_ROOT=\" + $env:PLUGIN_ROOT + \" COPILOT_PLUGIN_ROOT=\" + $env:COPILOT_PLUGIN_ROOT + \" CLAUDE_PLUGIN_ROOT=\" + $env:CLAUDE_PLUGIN_ROOT + \" CWD=\" + (Get-Location).Path + \" INPUT=\" + $in)",
+        "timeoutSec": 10
+      }
+    ],
+    "preToolUse": [
+      {
+        "type": "command",
+        "bash": "in=$(cat); log=\"${TMPDIR:-/tmp}/modernize-probe-hook.log\"; printf 'PRE %s PLUGIN_ROOT=%s COPILOT_PLUGIN_ROOT=%s CLAUDE_PLUGIN_ROOT=%s CWD=%s INPUT=%s\\n' \"$(date -u +%FT%TZ)\" \"$PLUGIN_ROOT\" \"$COPILOT_PLUGIN_ROOT\" \"$CLAUDE_PLUGIN_ROOT\" \"$PWD\" \"$in\" >> \"$log\"; t=$(printf '%s' \"$in\" | sed -n 's/.*\"tool_\\{0,1\\}[nN]ame\"[[:space:]]*:[[:space:]]*\"\\([^\"]*\\)\".*/\\1/p'); if printf '%s' \"$in\" | grep -Eq 'legacy[\\\\/]+probe' && ! printf '%s' \"$t\" | grep -Eq '^(view|read|glob|grep|search|ls|Read|Glob|Grep)$'; then echo '{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"modernize-probe guard: legacy/ is read-only\"}'; fi",
+        "powershell": "$in = [Console]::In.ReadToEnd(); $log = Join-Path $env:TEMP 'modernize-probe-hook.log'; Add-Content -Path $log -Value (\"PRE \" + (Get-Date -Format o) + \" PLUGIN_ROOT=\" + $env:PLUGIN_ROOT + \" COPILOT_PLUGIN_ROOT=\" + $env:COPILOT_PLUGIN_ROOT + \" CLAUDE_PLUGIN_ROOT=\" + $env:CLAUDE_PLUGIN_ROOT + \" CWD=\" + (Get-Location).Path + \" INPUT=\" + $in); try { $j = $in | ConvertFrom-Json } catch { $j = $null }; $t = ''; if ($j) { $t = [string]$j.toolName; if (-not $t) { $t = [string]$j.tool_name } }; if (($in -match 'legacy[\\\\/]+probe') -and ($t -notmatch '^(view|read|glob|grep|search|ls|Read|Glob|Grep)$')) { Write-Output '{\"permissionDecision\":\"deny\",\"permissionDecisionReason\":\"modernize-probe guard: legacy/ is read-only\"}' }",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

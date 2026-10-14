@@ -1,0 +1,23 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "probe-python": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["${PLUGIN_ROOT}/tools/probe_server.py", "python"],
+      "env": { "PROBE_DATA": "${PLUGIN_DATA}" }
+    },
+    "probe-python3": {
+      "type": "stdio",
+      "command": "python3",
+      "args": ["${PLUGIN_ROOT}/tools/probe_server.py", "python3"],
+      "env": { "PROBE_DATA": "${PLUGIN_DATA}" }
+    },
+    "probe-py": {
+      "type": "stdio",
+      "command": "py",
+      "args": ["-3", "${PLUGIN_ROOT}/tools/probe_server.py", "py"],
+      "env": { "PROBE_DATA": "${PLUGIN_DATA}" }
+    }
+  }
+}

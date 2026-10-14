@@ -1,0 +1,24 @@
+modernize-for-copilot
+Copyright 2026 Samuel Nyamukapa
+
+This product is a derivative work of the "code-modernization" plugin from
+https://github.com/anthropics/claude-plugins-official (plugins/code-modernization),
+licensed under the Apache License, Version 2.0. The upstream commit it is
+derived from is recorded in convert/upstream.json.
+
+Modifications made in this repository include, among others:
+- Commands rewritten as GitHub Copilot agent skills (plugin/skills/).
+- Agents converted to GitHub Copilot custom agents (.agent.md), with tool
+  names mapped to Copilot's tool aliases.
+- Workflows ported to GitHub Copilot dynamic workflows.
+- Scripts exposed through an MCP server instead of plugin-root paths.
+- The legacy/ read-only rule enforced by a Copilot preToolUse hook.
+- The live progress pane, its hooks, and usage telemetry removed.
+
+This project is not affiliated with or endorsed by Anthropic or GitHub.
+"Claude" is a trademark of Anthropic, PBC. "GitHub" and "Copilot" are
+trademarks of GitHub, Inc.
+
+Bundled third-party software:
+- Mermaid (plugin/assets/vendor/mermaid.min.js), MIT License; see
+  plugin/assets/vendor/LICENSE-mermaid.txt.

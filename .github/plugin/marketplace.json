@@ -1,0 +1,20 @@
+{
+  "name": "modernize-for-copilot",
+  "owner": {
+    "name": "Samuel Nyamukapa"
+  },
+  "metadata": {
+    "description": "Guided legacy-code modernization for GitHub Copilot CLI and the Copilot app."
+  },
+  "plugins": [
+    {
+      "name": "modernize-for-copilot",
+      "source": "./plugin",
+      "version": "0.1.0-dev",
+      "description": "Assess, map, mine business rules, plan, then upgrade, rewrite or rebuild legacy code with proof of behavioural equivalence.",
+      "license": "Apache-2.0",
+      "category": "development",
+      "keywords": ["modernization", "legacy", "cobol", "dotnet", "java", "migration"]
+    }
+  ]
+}

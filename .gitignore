@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+.DS_Store
+# Workspaces created while testing the plugin
+/legacy/
+/analysis/
+/modernized/
+SECRETS.local.md
+*.local.patch

@@ -1,0 +1,1 @@
+This file stands in for legacy source code. The plugin must never be able to edit it.
