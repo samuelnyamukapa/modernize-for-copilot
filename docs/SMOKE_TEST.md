@@ -44,10 +44,10 @@ You should see `modernize (v0.1.0-dev)` in the list, and nothing called `moderni
 
 ```powershell
 cd D:\githubProjects\modernize-sandbox
-copilot --experimental
+copilot
 ```
 
-Trust the folder when asked. Optional: `/model` and pick a Claude model, since the prompts were written for Claude.
+Trust the folder when asked. You don't need `--experimental` for Parts B and C: it only turns on dynamic workflows, which the plugin uses from Phase 4 onwards. Optional: `/model` and pick a Claude model, since the prompts were written for Claude. That needs a paid Copilot plan; Free and Student get Auto only.
 
 Leave approvals on **Manual**. Approve reads, and writes under `analysis\` and `modernized\`. Say **No** to anything that would edit `legacy\`; the guard blocks those anyway.
 
