@@ -28,11 +28,14 @@ FORBIDDEN = [
     (re.compile(r"(?<![\w:])/modernize-[a-z]"), "skills are invoked as /modernize:<verb>, not /modernize-<verb>"),
     (re.compile(r"['\"]code-modernization:"), "agents are named modernize:<agent>"),
     (re.compile(r"\bEnterPlanMode\b|\bExitPlanMode\b"), "say 'stop and wait for explicit approval'"),
+    (re.compile(r"\$(?:system|target_stack|module|scope|source_version|target_version|project_pattern|module_pattern|target_vision)\b"), "named placeholders are not substituted; write <system>, <target-stack>, ..."),
+    (re.compile(r"CLAUDE\.md"), "the handoff file is AGENTS.md"),
+    (re.compile(r"modernize-panel|modernize-sign|review-pane|progress pane"), "the progress pane is not ported"),
 ]
 
 AGENT_KEYS = {"name", "description", "tools", "model", "target", "user-invocable",
               "disable-model-invocation", "mcp-servers", "metadata"}
-SKILL_KEYS = {"name", "description", "license", "compatibility", "metadata", "allowed-tools"}
+SKILL_KEYS = {"name", "description"}
 
 
 def frontmatter(path: str) -> dict[str, str] | None:

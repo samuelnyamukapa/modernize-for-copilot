@@ -89,8 +89,12 @@ def protected_roots(ws: str) -> list[str]:
     legacy = os.path.join(ws, legacy_dir_name(ws))
     add(legacy)
     for candidate in [legacy] + ([os.path.join(legacy, d) for d in _listdir(legacy)]):
-        if os.path.islink(candidate) or _is_junction(candidate):
-            add(os.path.realpath(candidate))
+        try:
+            real = os.path.realpath(candidate)  # resolves symlinks and, on Windows, junctions
+        except (OSError, ValueError):
+            continue
+        if _norm(real) != _norm(candidate):
+            add(real)
     analysis = os.path.join(ws, "analysis")
     for system in _listdir(analysis):
         try:
@@ -172,8 +176,53 @@ def _tokens(segment: str) -> list[str]:
         return segment.split()
 
 
+LINK_TYPES = {"symboliclink", "junction", "hardlink"}
+
+
+def _ps_param(toks: list[str], *names: str) -> str | None:
+    lowered = [t.lower() for t in toks]
+    for name in names:
+        for i, t in enumerate(lowered):
+            if t == name and i + 1 < len(toks):
+                return toks[i + 1]
+            if t.startswith(name + ":"):
+                return toks[i][len(name) + 1:]
+    return None
+
+
+def _setup_allowed(verb: str, toks: list[str], base: str, legacy_root: str) -> bool | None:
+    """Linking a new system into legacy/ (or creating legacy/ itself) is how preflight wires
+    up the code, so it is allowed. Returns True to allow, None when the rule does not apply."""
+    def is_new_child(p: str) -> bool:
+        full = os.path.normpath(_rel(p, base))
+        return _norm(os.path.dirname(full)) == _norm(legacy_root) and not os.path.lexists(full)
+
+    def is_root(p: str) -> bool:
+        return _norm(os.path.normpath(_rel(p, base))) == _norm(legacy_root)
+
+    plain = [t for t in toks[1:] if not t.startswith("-")]
+    lowered = [t.lower() for t in toks]
+    if verb == "ln" and any(t.startswith("-") and "s" in t for t in toks[1:]) and len(plain) >= 2:
+        return True if is_new_child(plain[-1]) else None
+    if "mklink" in lowered:
+        rest = [t for t in toks[lowered.index("mklink") + 1:] if not t.startswith("/")]
+        return True if rest and is_new_child(rest[0]) else None
+    if verb in ("new-item", "ni"):
+        kind = (_ps_param(toks, "-itemtype", "-type") or "").lower()
+        path = _ps_param(toks, "-path", "-name") or (plain[0] if plain else None)
+        if path and kind in LINK_TYPES and is_new_child(path):
+            return True
+        if path and kind == "directory" and is_root(path):
+            return True
+        return None
+    if verb in ("mkdir", "md") and plain and all(is_root(p) for p in plain):
+        return True
+    return None
+
+
 def shell_violation(command: str, ws: str, roots: list[str], cwd: str | None) -> str | None:
     base = cwd or ws
+    legacy_root = roots[0] if roots else None
     in_protected = hit(base, ws, roots) if cwd else None
 
     # Redirections anywhere in the command: `> legacy/x`, `Out-File legacy\x`.
@@ -200,6 +249,8 @@ def shell_violation(command: str, ws: str, roots: list[str], cwd: str | None) ->
         referenced = next((r for r in (hit(_rel(a, base), ws, roots) for a in args) if r), None) or _mentioned(segment, ws, roots)
         target_root = referenced or in_protected
         if not target_root:
+            continue
+        if legacy_root and not in_protected and _setup_allowed(verb, toks, base, legacy_root):
             continue
         if verb in COPY_VERBS:
             dest = args[-1] if len(args) >= 2 else None
@@ -345,6 +396,14 @@ def self_test() -> list[str]:
             ("bash", {"command": "rm -rf modernized/billing && mkdir modernized/billing"}, False),
             ("bash", {"command": "touch PAY.cbl", "cwd": os.path.join(ws, "legacy", "billing")}, True),
             ("bash", {"command": "dotnet build modernized/billing-uplifted"}, False),
+            ("bash", {"command": "mkdir -p legacy && ln -s /work/payroll legacy/payroll"}, False),
+            ("bash", {"command": "ln -s /work/other legacy/billing"}, True),
+            ("bash", {"command": "mkdir legacy/billing/newdir"}, True),
+            ("powershell", {"command": "New-Item -ItemType Junction -Path legacy\\payroll -Target D:\\src\\payroll"}, False),
+            ("powershell", {"command": "New-Item -ItemType SymbolicLink -Path legacy\\billing -Target D:\\x"}, True),
+            ("powershell", {"command": "New-Item -ItemType File -Path legacy\\payroll"}, True),
+            ("powershell", {"command": "cmd /c mklink /J legacy\\payroll D:\\src\\payroll"}, False),
+            ("powershell", {"command": "New-Item -ItemType Directory -Path legacy -Force"}, False),
         ]
         for tool, args, want_deny in cases:
             got = decide({"cwd": ws, "toolName": tool, "toolArgs": args}) is not None

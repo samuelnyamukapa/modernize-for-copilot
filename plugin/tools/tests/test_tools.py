@@ -181,6 +181,27 @@ class GuardTest(unittest.TestCase):
                               capture_output=True, cwd=PLUGIN)
         self.assertIn("deny", proc.stdout.decode())
 
+    def test_real_hook_command_denies_and_allows(self):
+        """Run the exact hooks.json command for this OS, as Copilot would (cwd = plugin root)."""
+        with open(os.path.join(PLUGIN, "com.github.copilot", "hooks", "hooks.json")) as fh:
+            entry = json.load(fh)["hooks"]["preToolUse"][0]
+        if os.name == "nt":
+            argv = ["powershell", "-NoProfile", "-NonInteractive", "-Command", entry["powershell"]]
+        else:
+            argv = ["bash", "-c", entry["bash"]]
+        ws = tempfile.mkdtemp()
+        try:
+            os.makedirs(os.path.join(ws, "legacy", "billing"))
+            env = dict(os.environ, PLUGIN_ROOT=PLUGIN)
+            deny_event = {"cwd": ws, "toolName": "edit", "toolArgs": {"path": os.path.join("legacy", "billing", "A.cbl")}}
+            allow_event = {"cwd": ws, "toolName": "edit", "toolArgs": {"path": os.path.join("modernized", "A.java")}}
+            out = subprocess.run(argv, input=json.dumps(deny_event).encode(), capture_output=True, cwd=PLUGIN, env=env, timeout=60)
+            self.assertIn('"permissionDecision": "deny"', out.stdout.decode(), out.stderr.decode())
+            out = subprocess.run(argv, input=json.dumps(allow_event).encode(), capture_output=True, cwd=PLUGIN, env=env, timeout=60)
+            self.assertEqual(out.stdout.decode().strip(), "", out.stderr.decode())
+        finally:
+            shutil.rmtree(ws, ignore_errors=True)
+
     def test_hooks_json_and_mcp_json_shape(self):
         with open(os.path.join(PLUGIN, "com.github.copilot", "hooks", "hooks.json")) as fh:
             hooks = json.load(fh)
