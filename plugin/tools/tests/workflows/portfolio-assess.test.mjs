@@ -119,10 +119,12 @@ test("meta: exact name, upstream description and phase, argsSchema in the suppor
     assertSubset(meta.argsSchema);
 });
 
-test("argsSchema accepts the skill's args (object or JSON string) and rejects structural errors", () => {
+test("argsSchema accepts the skill's args object and rejects structural errors", () => {
     const s = definition.meta.argsSchema;
     assert.ok(matches(s, ARGS));
-    assert.ok(matches(s, JSON.stringify(ARGS)));
+    // The root is a plain object (GitHub's documented shape); a JSON string is parsed by run() only.
+    assert.equal(s.type, "object");
+    assert.ok(!matches(s, JSON.stringify(ARGS)));
     assert.ok(!matches(s, {}));
     assert.ok(!matches(s, { parentDir: "/srv/estate" }));
     assert.ok(!matches(s, { parentDir: "/srv/estate", systems: "billing" }));

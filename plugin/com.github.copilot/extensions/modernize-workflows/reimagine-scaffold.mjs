@@ -44,29 +44,25 @@ const meta = {
     description:
         "Phase E of /modernize:reimagine: scaffold every approved service in parallel — no cap; the runtime queues agents against its concurrency limit",
     phases: [{ title: "Scaffold", detail: "one agent per approved service" }],
-    // The object form, or the same object as a JSON string (see normaliseArgs).
+    // An object, as in GitHub's own example. run() still accepts the same object as a JSON
+    // string (see normaliseArgs) for runs started from session.workflow.run(), which skip this check.
     argsSchema: {
-        anyOf: [
-            {
-                type: "object",
-                required: ["system", "services"],
-                properties: {
-                    system: { type: "string" },
-                    services: {
-                        type: "array",
-                        items: {
-                            type: "object",
-                            required: ["name"],
-                            properties: {
-                                name: { type: "string" },
-                                responsibilities: { type: ["string", "null"] },
-                            },
-                        },
+        type: "object",
+        required: ["system", "services"],
+        properties: {
+            system: { type: "string" },
+            services: {
+                type: "array",
+                items: {
+                    type: "object",
+                    required: ["name"],
+                    properties: {
+                        name: { type: "string" },
+                        responsibilities: { type: ["string", "null"] },
                     },
                 },
             },
-            { type: "string" },
-        ],
+        },
     },
 };
 

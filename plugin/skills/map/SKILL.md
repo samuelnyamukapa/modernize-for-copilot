@@ -165,7 +165,9 @@ calls, reads, writes or is called by. The viewer shows it in the sidebar.
    occurs in its packet, re-ask once for any that fails, then leave that node
    without a `description`.
 4. Save the packet-building and merge script next to `extract_topology.py`, and run it
-   with the same Python as above.
+   with the same Python as above. Put everything it produces along the way (packets,
+   the paragraphs as they came back) under `analysis/<system>/map/describe/`, never
+   loose in `analysis/<system>/`: that folder holds the deliverables people open.
 
 ## Render
 

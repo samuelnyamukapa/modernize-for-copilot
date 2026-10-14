@@ -4,13 +4,12 @@ The test runs in its own Copilot session, in its own folder, so it never touches
 
 | Folder | What |
 |---|---|
-| `D:\githubProjects\modernize-for-copilot` | this repo: the plugin source |
 | `D:\githubProjects\modernize-sandbox` | the test workspace: `analysis\`, `legacy\`, `modernized\` appear here |
 | `D:\githubProjects\modernize-sandbox\sources\eShopLegacyMVCSolution` | the legacy code (Microsoft's eShopModernizing sample, MIT) |
 
 ## Part A: one-time setup
 
-**A1. Install Git** (Copilot needs it for marketplace installs, and you need it for `git pull`):
+**A1. Install Git** (Copilot needs it to install from a marketplace):
 
 ```powershell
 winget install --id Git.Git -e
@@ -18,25 +17,25 @@ winget install --id Git.Git -e
 
 Close **every** PowerShell and Copilot window, then open a new PowerShell and check: `git --version`.
 
-**A2. Update the plugin source:**
-
-```powershell
-cd D:\githubProjects\modernize-for-copilot
-git fetch origin
-git reset --hard origin/main
-```
-
-`reset --hard` throws away local changes in this folder only. There are none worth keeping: Windows line endings made files look changed.
-
-**A3. Reinstall the plugin.** Close every Copilot session first, or the uninstall fails.
+**A2. Install the plugin from the marketplace.** This is the same path users take. Copilot CLI 1.0.98 warns that installing from a local folder is deprecated, so the smoke test no longer does that. Close every Copilot session first, or the uninstall fails.
 
 ```powershell
 copilot plugin uninstall modernize
-copilot plugin install D:\githubProjects\modernize-for-copilot\plugin
+copilot plugin marketplace add samuelnyamukapa/modernize-for-copilot
+copilot plugin install modernize@modernize-for-copilot
 copilot plugin list
 ```
 
-You should see `modernize (v0.1.0-dev)` in the list, and nothing called `modernize-for-copilot` or `modernize-probe`.
+You should see `modernize@modernize-for-copilot (v0.1.0-dev)`. The first line fails harmlessly if the plugin isn't installed.
+
+**A3. After each fix is pushed,** close the Copilot sessions and update:
+
+```powershell
+copilot plugin marketplace update modernize-for-copilot
+copilot plugin update modernize@modernize-for-copilot
+```
+
+**For plugin development only:** `copilot --plugin-dir D:\path\to\modernize-for-copilot\plugin` loads a local clone for one session without installing it. After a `git pull`, start a new session. Don't combine it with an installed copy, or the plugin loads twice.
 
 ## Part B: the test session
 

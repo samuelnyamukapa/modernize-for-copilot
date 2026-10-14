@@ -168,7 +168,9 @@ test("meta: name, phases, limits and an argsSchema inside the supported subset",
     // The documented args pass the declared schema; missing system and a non-array `modules` do not.
     assert.ok(conforms(meta.argsSchema, { system: "sys", modules: MODULES, batchSize: 4 }));
     assert.ok(conforms(meta.argsSchema, { system: "sys", modulePattern: "src/*", maxRounds: 3 }));
-    assert.ok(conforms(meta.argsSchema, JSON.stringify({ system: "sys" })));
+    // The root is a plain object (GitHub's documented shape); a JSON string is parsed by run() only.
+    assert.equal(meta.argsSchema.type, "object");
+    assert.ok(!conforms(meta.argsSchema, JSON.stringify({ system: "sys" })));
     assert.ok(!conforms(meta.argsSchema, {}));
     assert.ok(!conforms(meta.argsSchema, { system: "sys", modules: { name: "x" } }));
 });

@@ -153,7 +153,9 @@ test("argsSchema accepts the skill's full-scan and gap re-run args and rejects s
     const s = definition.meta.argsSchema;
     const unverified = { ...F2, unverifiedReason: "no refuter verdict" };
     assert.ok(matches(s, { system: "billing" }));
-    assert.ok(matches(s, JSON.stringify({ system: "billing" })));
+    // The root is a plain object (GitHub's documented shape); a JSON string is parsed by run() only.
+    assert.equal(s.type, "object");
+    assert.ok(!matches(s, JSON.stringify({ system: "billing" })));
     assert.ok(matches(s, { system: "billing", classes: ["deps", "input"], findings: [unverified] }));
     assert.ok(matches(s, { system: "billing", classes: [], findings: [unverified] }));
     assert.ok(matches(s, { system: "billing", classes: null, findings: null }));

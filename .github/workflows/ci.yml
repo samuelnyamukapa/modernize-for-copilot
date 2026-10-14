@@ -41,3 +41,9 @@ jobs:
       - name: Dynamic workflow tests
         if: always()
         run: node --test "plugin/tools/tests/workflows/*.test.mjs"
+      - name: Workflows pass the real Copilot SDK's checks
+        if: always()
+        working-directory: convert
+        run: |
+          npm install --no-save --no-package-lock --ignore-scripts @github/copilot-sdk@1
+          node check_sdk.mjs

@@ -43,19 +43,15 @@ const meta = {
     description:
         "Per-system portfolio sweep as an independent pipeline — metrics, fingerprint, doc coverage per system; COCOMO computed deterministically",
     phases: [{ title: "Survey", detail: "one metrics agent per system, all independent" }],
-    // The object form, or the same object as a JSON string (see normaliseArgs).
+    // An object, as in GitHub's own example. run() still accepts the same object as a JSON
+    // string (see normaliseArgs) for runs started from session.workflow.run(), which skip this check.
     argsSchema: {
-        anyOf: [
-            {
-                type: "object",
-                required: ["parentDir", "systems"],
-                properties: {
-                    parentDir: { type: "string" },
-                    systems: { type: "array", items: { type: "string" } },
-                },
-            },
-            { type: "string" },
-        ],
+        type: "object",
+        required: ["parentDir", "systems"],
+        properties: {
+            parentDir: { type: "string" },
+            systems: { type: "array", items: { type: "string" } },
+        },
     },
 };
 

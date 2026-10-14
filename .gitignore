@@ -7,3 +7,5 @@ __pycache__/
 /modernized/
 SECRETS.local.md
 *.local.patch
+node_modules/
+package-lock.json

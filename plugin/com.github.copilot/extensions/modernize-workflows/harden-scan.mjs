@@ -100,38 +100,34 @@ const meta = {
         { title: "Find", detail: "one finder per vulnerability class" },
         { title: "Verify", detail: "one refuter per finding; second judge for Critical/High" },
     ],
-    // The object form, or the same object as a JSON string (see normaliseArgs).
+    // An object, as in GitHub's own example. run() still accepts the same object as a JSON
+    // string (see normaliseArgs) for runs started from session.workflow.run(), which skip this check.
     // classes/findings: only to re-run an earlier run's deadFinders/unverified; omit both for the full scan.
     argsSchema: {
-        anyOf: [
-            {
-                type: "object",
-                required: ["system"],
-                properties: {
-                    system: { type: "string" },
-                    classes: {
-                        type: ["array", "null"],
-                        items: { type: "string", enum: CLASSES.map((c) => c.key) },
-                    },
-                    findings: {
-                        type: ["array", "null"],
-                        items: {
-                            type: "object",
-                            required: [...FINDING_FIELDS, "severity"],
-                            properties: {
-                                cwe: { type: "string" },
-                                source: { type: "string" },
-                                title: { type: "string" },
-                                exploitScenario: { type: "string" },
-                                recommendedFix: { type: "string" },
-                                severity: { type: "string", enum: ["Critical", "High", "Medium", "Low"] },
-                            },
-                        },
+        type: "object",
+        required: ["system"],
+        properties: {
+            system: { type: "string" },
+            classes: {
+                type: ["array", "null"],
+                items: { type: "string", enum: CLASSES.map((c) => c.key) },
+            },
+            findings: {
+                type: ["array", "null"],
+                items: {
+                    type: "object",
+                    required: [...FINDING_FIELDS, "severity"],
+                    properties: {
+                        cwe: { type: "string" },
+                        source: { type: "string" },
+                        title: { type: "string" },
+                        exploitScenario: { type: "string" },
+                        recommendedFix: { type: "string" },
+                        severity: { type: "string", enum: ["Critical", "High", "Medium", "Low"] },
                     },
                 },
             },
-            { type: "string" },
-        ],
+        },
     },
 };
 

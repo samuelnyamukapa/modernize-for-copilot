@@ -321,25 +321,21 @@ const P0_LENS_KEYS = ['compliance', 'fidelity']
 // This schema enforces only what run() itself refuses (no `system`, `modules` that is
 // not an array). Module entries are left unconstrained on purpose: run() drops a
 // malformed entry, logs it and returns it in stats.droppedModules (upstream's
-// behaviour) instead of failing the whole invocation. The string branch admits the
-// caller's raw JSON string, which run() parses (upstream's normaliser). Runs started
-// through session.workflow.run() are not checked against this schema, so run()
+// behaviour) instead of failing the whole invocation. The root is a plain object, as in
+// GitHub's own example: Copilot sends every workflow's schema in one registration, so one it
+// rejected would drop all six. Runs started through session.workflow.run() are not checked
+// against this schema, so run() still parses a raw JSON string (upstream's normaliser) and
 // validates everything again.
 const ARGS_SCHEMA = {
-  anyOf: [
-    {
-      type: 'object',
-      required: ['system'],
-      properties: {
-        system: { type: 'string' },
-        modules: { type: ['array', 'null'] },
-        batchSize: { type: ['number', 'string', 'null'] },
-        modulePattern: { type: ['string', 'null'] },
-        maxRounds: { type: ['number', 'string', 'null'] },
-      },
-    },
-    { type: 'string' },
-  ],
+  type: 'object',
+  required: ['system'],
+  properties: {
+    system: { type: 'string' },
+    modules: { type: ['array', 'null'] },
+    batchSize: { type: ['number', 'string', 'null'] },
+    modulePattern: { type: ['string', 'null'] },
+    maxRounds: { type: ['number', 'string', 'null'] },
+  },
 }
 
 async function run(ctx) {

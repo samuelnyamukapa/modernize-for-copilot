@@ -39,14 +39,16 @@ preflight → assess → map → extract-rules → brief → (reimagine | transf
 
 Specialist custom agents do the heavy reading and checking: `legacy-analyst`, `business-rules-extractor`, `architecture-critic`, `security-auditor`, `test-engineer`, `version-delta-analyst`, `uplift-migrator` and `scaffolder`.
 
-## Install (once released)
+## Install
 
-Copilot CLI:
+Copilot CLI (checked with 1.0.98):
 
 ```sh
 copilot plugin marketplace add samuelnyamukapa/modernize-for-copilot
 copilot plugin install modernize@modernize-for-copilot
 ```
+
+To update later: `copilot plugin update modernize@modernize-for-copilot`. To try a local clone without installing it: `copilot --plugin-dir <clone>/plugin`.
 
 Copilot app: add the same marketplace, then install the plugin from it.
 
