@@ -15,7 +15,7 @@ If that line shows the literal text `$ARGUMENTS` or is empty, the skill was star
 
 The **workspace** is the absolute path of the current working directory: the project folder that holds `legacy/`, `analysis/` and `modernized/`.
 
-Ask a person to decide the business rules in `analysis/<system>/BUSINESS_RULES.md` that depend on judgement, and record each answer so the plan and the build honor it. Agents mined the rules and a second agent checked every citation, but only someone who knows the business can say whether a rule is *right*: whether a truncation is intended or a defect, whether a threshold is still the policy. This skill asks in a pop-up (the `ask_user` tool) and never edits `BUSINESS_RULES.md`.
+Ask a person to decide the business rules in `analysis/<system>/BUSINESS_RULES.md` that depend on judgement, and record each answer so the plan and the build honor it. Agents mined the rules (and, when the extraction ran as a workflow, a second agent checked every citation; the file's first line says whether it did), but only someone who knows the business can say whether a rule is *right*: whether a truncation is intended or a defect, whether a threshold is still the policy. This skill asks in a pop-up (the `ask_user` tool) and never edits `BUSINESS_RULES.md`.
 
 ## 1 — Choose the rules
 
