@@ -63,6 +63,11 @@ one and whose `Modules:` include `<module>`, and treat its scope, entry criteria
 edits the user made as binding. An unmet entry criterion is the next step: meet it, never re-plan
 around it. If no phase covers `<module>`, stop and ask which phase this is.
 
+**Wrong command for the plan.** If the brief's phases name only `/modernize:uplift` or `/modernize:reimagine` on their `Command:` lines, the
+approved plan does not use `transform`: before anything else, stop and ask with `ask_user` whether to run the
+planned command instead (recommended) or to transform outside the plan. Outside the plan, nothing the brief gates is
+ticked or claimed, and the closing summary says the work was not part of the approved plan.
+
 Read the module's source and the rules in `BUSINESS_RULES.md` that reference it, and any verdicts on them in `analysis/<system>/RULE_REVIEWS.json`: a rule marked `wrong` is not pinned as the oracle (use the reviewer's note for what is right, and if the note does not say, ask), and a P0 rule marked `discuss` is a question to settle at this plan gate before any code. Then present the
 plan and **stop: write no code until the user explicitly approves**: which
 source files are in scope, the target structure, which rules and behaviors it implements, how you will

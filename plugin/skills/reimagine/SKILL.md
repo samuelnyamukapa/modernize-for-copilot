@@ -39,6 +39,11 @@ criteria, exit criteria and the user's edits as binding on everything below, on 
 this skill's own two checkpoints. An unmet entry criterion is the next step: meet it, never re-plan
 around it. If no phase matches, stop and ask which phase this is.
 
+**Wrong command for the plan.** If the brief's phases name only `/modernize:uplift` or `/modernize:transform` on their `Command:` lines, the
+approved plan does not use `reimagine`: before anything else, stop and ask with `ask_user` whether to run the
+planned command instead (recommended) or to reimagine outside the plan. Outside the plan, nothing the brief gates is
+ticked or claimed, and the closing summary says the work was not part of the approved plan.
+
 ## Phase A — Specification mining
 
 Reuse what discovery already produced (honoring `RULE_REVIEWS.json`: a rule marked `wrong` is not part of the spec as written, and a P0 rule marked `discuss` is a question for the architecture checkpoint): `BUSINESS_RULES.md`, `DATA_OBJECTS.md`, `topology.json` and

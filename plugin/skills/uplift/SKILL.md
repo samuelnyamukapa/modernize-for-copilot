@@ -124,6 +124,11 @@ one of its phases: find the phase whose `Command:` is this one and whose scope m
 as binding on the plan in Step 2. An unmet entry criterion ("baseline recorded", "pilot playbook
 approved") is the next step: meet it, never re-plan around it. If no phase matches, stop and ask.
 
+**Wrong command for the plan.** If the brief's phases name only `/modernize:transform` or `/modernize:reimagine` on their `Command:` lines, the
+approved plan does not use `uplift`: before anything else, stop and ask with `ask_user` whether to run the
+planned command instead (recommended) or to uplift outside the plan. Outside the plan, nothing the brief gates is
+ticked or claimed, and the closing summary says the work was not part of the approved plan.
+
 **Working copy first.** An uplift edits a whole solution *in place* (target frameworks, API fixes,
 the `.sln` and relative project references intact, a reviewable `git diff`). So copy it once, whole, and do all
 editing there:
