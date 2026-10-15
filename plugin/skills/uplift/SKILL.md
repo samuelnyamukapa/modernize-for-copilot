@@ -50,7 +50,10 @@ destination is outside `legacy/`. A denied write under `legacy/` is expected: th
 with another command or tool, and never try to get around it; write to `modernized/` or `analysis/` instead.
 One exception: the denial ends with `Matched:` and the part of the command it matched. If that part does not
 write under `legacy/` (a commit message that names it, a copy *from* it), the guard misread a compound command:
-run its steps as separate commands, and if one step is denied on its own, stop and report it. Never run
+run its steps as separate commands, and if one step is denied on its own, stop and report it. A denial recorded by an
+earlier session (in `BASELINE.md`, notes or the inbox) is not permanent: the plugin may have been fixed since. Retry
+that step once, on its own, before treating it as a blocker; if the guard allows it, record that and carry on; if it
+denies it, record the full reason, including the `Matched:` part, and stop. Never run
 this skill in autopilot or with `--yolo` / `--allow-all` (Step 5b says why).
 
 This is **not** `transform`, which extracts intent and rewrites idiomatically. Here the code is good

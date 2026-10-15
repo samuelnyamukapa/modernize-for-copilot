@@ -34,7 +34,10 @@ hook that runs before every tool call of this agent and of every agent it delega
 around it; write to `modernized/` or `analysis/` instead.
 One exception: the denial ends with `Matched:` and the part of the command it matched. If that part does not
 write under `legacy/` (a commit message that names it, a copy *from* it), the guard misread a compound command:
-run its steps as separate commands, and if one step is denied on its own, stop and report it.
+run its steps as separate commands, and if one step is denied on its own, stop and report it. A denial recorded by an
+earlier session (in `BASELINE.md`, notes or the inbox) is not permanent: the plugin may have been fixed since. Retry
+that step once, on its own, before treating it as a blocker; if the guard allows it, record that and carry on; if it
+denies it, record the full reason, including the `Matched:` part, and stop.
 
 ## Step 0 — Toolchain, then the plan (human gate)
 
