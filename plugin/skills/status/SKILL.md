@@ -37,7 +37,9 @@ presence and modification time:
 | transform | each `modernized/<system>/<module>/`: tests present? `TRANSFORMATION_NOTES.md` present (its completion marker)? |
 | reimagine | `modernized/<system>-reimagined/`: per-service acceptance tests, and the `AGENTS.md` handoff (its completion marker; it does not write `TRANSFORMATION_NOTES.md`) |
 | equivalence | `EQUIVALENCE.json`: cases executed, same, differs (any differing or missing case, or zero executed, is a failure) |
-| verify | `VERIFICATION.md` (written by `/modernize:verify`): the verdict per built module (PROVEN, PARTLY PROVEN or NOT PROVEN) and whether a person has signed it. A built module with no `VERIFICATION.md`, or one older than the module's code or tests, is **not proven yet** |
+| verify | `VERIFICATION.md` (written by `/modernize:verify`): the verdict per built module (PROVEN, PARTLY PROVEN or NOT PROVEN) and whether a person has signed it: signed means the
+**Sign-off** table at the end of `VERIFICATION.md` has a Name and a Decision filled in (`VERIFICATION.json` keeps the
+script's blank template, so never judge the sign-off from it). A built module with no `VERIFICATION.md`, or one older than the module's code or tests, is **not proven yet** |
 
 ## 2 — Stale
 
