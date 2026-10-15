@@ -29,6 +29,9 @@ never write to it. The plugin's `legacy/` guard enforces this: a `preToolUse` ho
 this agent, of every agent it delegates to and of every dynamic-workflow agent. A denied write under `legacy/` is
 expected: that is the guard working. Do not retry with another command or tool, and never try to get around it;
 write to `modernized/<system>-reimagined/` or `analysis/` instead.
+One exception: the denial ends with `Matched:` and the part of the command it matched. If that part does not
+write under `legacy/` (a commit message that names it, a copy *from* it), the guard misread a compound command:
+run its steps as separate commands, and if one step is denied on its own, stop and report it.
 
 **The brief is binding.** If `analysis/<system>/MODERNIZATION_BRIEF.md` exists, find the phase whose
 `Command:` is this one and whose scope matches `<system>` and <target-vision>, and treat its scope, entry

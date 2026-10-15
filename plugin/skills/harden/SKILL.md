@@ -28,6 +28,9 @@ delegated agents and dynamic-workflow agents, and denies writes under `legacy/` 
 commands. So this skill writes the patch and never tries to apply it, even when asked to: the user applies it
 themselves, from a terminal of their own (see **Finish**). If the guard denies a call, that is the guard working:
 do not retry with another command or tool, and never try to get around it.
+One exception: the denial ends with `Matched:` and the part of the command it matched. If that part does not
+write under `legacy/` (a commit message that names it, a copy *from* it), the guard misread a compound command:
+run its steps as separate commands, and if one step is denied on its own, stop and report it.
 
 ## Step 0 — Secrets quarantine
 

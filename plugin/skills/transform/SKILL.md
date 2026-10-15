@@ -32,6 +32,9 @@ the earliest phase whose `Command:` is `transform` that has no
 hook that runs before every tool call of this agent and of every agent it delegates to. A denied write under
 `legacy/` is expected: that is the guard working. Do not retry with another command or tool, and never try to get
 around it; write to `modernized/` or `analysis/` instead.
+One exception: the denial ends with `Matched:` and the part of the command it matched. If that part does not
+write under `legacy/` (a commit message that names it, a copy *from* it), the guard misread a compound command:
+run its steps as separate commands, and if one step is denied on its own, stop and report it.
 
 ## Step 0 — Toolchain, then the plan (human gate)
 

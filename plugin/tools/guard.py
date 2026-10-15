@@ -28,6 +28,8 @@ import shlex
 import sys
 
 REASON = "modernize guard: {root} is read-only legacy source. Write to analysis/ or modernized/ instead."
+# Shown after REASON so the agent and the person can see which part of a compound command matched.
+MATCHED = " Matched: `{part}`."
 
 READ_ONLY_TOOLS = {
     "view", "read", "read_file", "glob", "grep", "search", "ls", "list_dir", "list_directory", "rg",
@@ -51,7 +53,11 @@ WRITE_VERBS = {
     "erase", "rd", "ren", "move", "md",
 }
 COPY_VERBS = {"cp", "copy", "copy-item", "cpi", "xcopy", "robocopy", "rsync", "scp"}
-CD_VERBS = {"cd", "pushd", "set-location", "sl", "chdir"}
+CD_VERBS = {"cd", "pushd", "push-location", "set-location", "sl", "chdir"}
+POP_VERBS = {"popd", "pop-location"}
+# Options whose value is not a path (a commit message, an author): never treat their text as a target.
+GIT_VALUE_OPTS = {"-m", "--message", "-F", "--file", "--author", "--date", "--template", "-t", "--trailer",
+                  "-c", "-C", "--reuse-message", "--reedit-message", "--fixup", "--squash", "--cleanup", "-b", "-B"}
 GIT_WRITE = {"apply", "checkout", "restore", "reset", "clean", "stash", "am", "rm", "mv", "switch", "merge", "rebase", "pull", "commit"}
 # Build and migration tools write next to the project they are pointed at (obj/, bin/, target/,
 # node_modules/, packages/, or the project files themselves). Pointed at legacy, they are writes.
@@ -201,7 +207,7 @@ def _ps_param(toks: list[str], *names: str) -> str | None:
         for i, t in enumerate(lowered):
             if t == name and i + 1 < len(toks):
                 return toks[i + 1]
-            if t.startswith(name + ":"):
+            if t.startswith(name + ":") or t.startswith(name + "="):
                 return toks[i][len(name) + 1:]
     return None
 
@@ -237,31 +243,51 @@ def _setup_allowed(verb: str, toks: list[str], base: str, legacy_root: str) -> b
 
 
 def shell_violation(command: str, ws: str, roots: list[str], cwd: str | None) -> str | None:
+    return shell_violation_detail(command, ws, roots, cwd)[0]
+
+
+def shell_violation_detail(command: str, ws: str, roots: list[str], cwd: str | None) -> tuple[str | None, str]:
+    """Return (protected root, the part of the command that matched), or (None, "")."""
     base = cwd or ws
     legacy_root = roots[0] if roots else None
     in_protected = hit(base, ws, roots) if cwd else None
+    stack: list[tuple[str, str | None]] = []
 
     # Redirections anywhere in the command: `> legacy/x`, `Out-File legacy\x`.
     for m in REDIRECT.finditer(command):
         target = m.group(1) or m.group(2)
         root = hit(_rel(target, base), ws, roots)
         if root:
-            return root
+            return root, m.group(0).strip()
 
     for segment in SEGMENT_SPLIT.split(command):
         toks = _tokens(segment.strip())
         if not toks:
             continue
+        part = segment.strip()
         verb = os.path.basename(toks[0].replace("\\", "/")).lower()
         for ext in (".exe", ".cmd", ".bat"):
             if verb.endswith(ext):
                 verb = verb[: -len(ext)]
         args = [t for t in toks[1:] if not t.startswith("-") and not re.match(r"^/[A-Za-z]{1,3}$", t)]
+        if verb in POP_VERBS:
+            if stack:
+                base, in_protected = stack.pop()
+            continue
         if verb in CD_VERBS and args:
+            if verb in ("pushd", "push-location"):
+                stack.append((base, in_protected))
             root = hit(_rel(args[0], base), ws, roots)
             in_protected = root
             if root is None:
                 base = os.path.normpath(_rel(args[0], base))
+            continue
+        if verb == "git":
+            # Judge git by the repository it runs in and the paths it is given, never by
+            # message text: `git -C modernized/x commit -m "copy of legacy/x"` writes nothing there.
+            root = _git_violation(toks, base, in_protected, ws, roots)
+            if root:
+                return root, part
             continue
         referenced = next((r for r in (hit(_rel(a, base), ws, roots) for a in args) if r), None) or _mentioned(segment, ws, roots)
         target_root = referenced or in_protected
@@ -270,10 +296,14 @@ def shell_violation(command: str, ws: str, roots: list[str], cwd: str | None) ->
         if legacy_root and not in_protected and _setup_allowed(verb, toks, base, legacy_root):
             continue
         if verb in COPY_VERBS:
-            dest = args[-1] if len(args) >= 2 else None
+            dest = _ps_param(toks, "-destination") if verb in ("copy-item", "cpi") else None
+            if dest is None and verb == "cp":
+                dest = _ps_param(toks, "-t", "--target-directory")
+            if dest is None:
+                dest = args[-1] if len(args) >= 2 else None
             dest_root = hit(_rel(dest, base), ws, roots) if dest else in_protected
             if dest_root:
-                return dest_root
+                return dest_root, part
             continue
         if verb == "sed" and not any(t == "-i" or t.startswith("-i") or t == "--in-place" for t in toks[1:]):
             continue  # plain sed only prints
@@ -281,14 +311,48 @@ def shell_violation(command: str, ws: str, roots: list[str], cwd: str | None) ->
             continue
         if verb == "awk" and "inplace" not in segment:
             continue
-        if verb in WRITE_VERBS:
-            return target_root
-        if verb == "git" and _git_subcommand(toks) in GIT_WRITE:
-            return target_root
-        if _builds(verb, toks):
-            return target_root
-        if INLINE_WRITE.search(segment):
-            return target_root
+        if verb in WRITE_VERBS or _builds(verb, toks) or INLINE_WRITE.search(segment):
+            return target_root, part
+    return None, ""
+
+
+def _git_violation(toks: list[str], base: str, in_protected: str | None, ws: str, roots: list[str]) -> str | None:
+    repo = None
+    i = 1
+    while i < len(toks):
+        t = toks[i]
+        if t in ("-C", "--work-tree") and i + 1 < len(toks):
+            repo = toks[i + 1] if repo is None or os.path.isabs(toks[i + 1]) else os.path.join(repo, toks[i + 1])
+            i += 2
+            continue
+        if t.startswith("--work-tree="):
+            repo = t.split("=", 1)[1]
+            i += 1
+            continue
+        if t in ("-c", "--git-dir", "--namespace"):
+            i += 2
+            continue
+        if t.startswith("-"):
+            i += 1
+            continue
+        break
+    if i >= len(toks) or toks[i].lower() not in GIT_WRITE:
+        return None
+    repo_dir = os.path.normpath(_rel(repo, base)) if repo else base
+    repo_root = hit(repo_dir, ws, roots) if repo else in_protected
+    if repo_root:
+        return repo_root
+    j = i + 1
+    while j < len(toks):
+        t = toks[j]
+        if t in GIT_VALUE_OPTS:
+            j += 2
+            continue
+        if not t.startswith("-"):
+            root = hit(_rel(t, repo_dir), ws, roots)
+            if root:
+                return root
+        j += 1
     return None
 
 
@@ -339,6 +403,11 @@ def _rel(path: str, base: str) -> str:
 
 def decide(event: dict) -> str | None:
     """Return the protected root a call would write to, or None to allow."""
+    return decide_detail(event)[0]
+
+
+def decide_detail(event: dict) -> tuple[str | None, str]:
+    """Like decide, plus the part of a shell command that matched ("" for non-shell tools)."""
     ws = event.get("cwd") or os.getcwd()
     tool = str(event.get("toolName") or event.get("tool_name") or "")
     args = event.get("toolArgs", event.get("tool_input"))
@@ -348,26 +417,30 @@ def decide(event: dict) -> str | None:
         except ValueError:
             pass
     if tool in READ_ONLY_TOOLS or tool.lower() in READ_ONLY_TOOLS:
-        return None
+        return None, ""
     roots = protected_roots(ws)
     if not any(os.path.lexists(r) for r in roots):
-        return None  # nothing to protect in this workspace
+        return None, ""  # nothing to protect in this workspace
     if tool in SHELL_TOOLS or tool.lower() in SHELL_TOOLS:
         command = args.get("command") if isinstance(args, dict) else args
         if not isinstance(command, str):
-            return None
+            return None, ""
         cwd = next((args.get(k) for k in CWD_KEYS if isinstance(args, dict) and isinstance(args.get(k), str)), None)
-        return shell_violation(command, ws, roots, cwd)
+        return shell_violation_detail(command, ws, roots, cwd)
     for p in paths_from_args(args):
         root = hit(p, ws, roots)
         if root:
-            return root
-    return None
+            return root, ""
+    return None, ""
 
 
-def deny(root: str, ws: str) -> str:
+def deny(root: str, ws: str, part: str = "") -> str:
     shown = os.path.relpath(root, ws) if _inside(ws, root) else root
-    return json.dumps({"permissionDecision": "deny", "permissionDecisionReason": REASON.format(root=shown.replace("\\", "/"))})
+    reason = REASON.format(root=shown.replace("\\", "/"))
+    if part:
+        part = " ".join(part.split())
+        reason += MATCHED.format(part=part if len(part) <= 160 else part[:157] + "...")
+    return json.dumps({"permissionDecision": "deny", "permissionDecisionReason": reason})
 
 
 def main(argv: list[str]) -> int:
@@ -379,9 +452,9 @@ def main(argv: list[str]) -> int:
         else:
             raw = sys.stdin.buffer.read().decode("utf-8-sig", "replace")
         event = json.loads(raw) if raw.strip() else {}
-        root = decide(event)
+        root, part = decide_detail(event)
         if root:
-            sys.stdout.write(deny(root, event.get("cwd") or os.getcwd()) + "\n")
+            sys.stdout.write(deny(root, event.get("cwd") or os.getcwd(), part) + "\n")
     except Exception as exc:  # fail closed only when the call plausibly touches legacy
         if re.search(r"(?:^|[\\/\"' ])legacy[\\/]", raw):
             sys.stdout.write(json.dumps({"permissionDecision": "deny",
@@ -438,6 +511,15 @@ def self_test() -> list[str]:
             ("bash", {"command": "upgrade-assistant analyze legacy/billing/Billing.sln --report modernized/ua.sarif"}, False),
             ("bash", {"command": "upgrade-assistant upgrade legacy/billing/Billing.csproj"}, True),
             ("bash", {"command": "cobc -fsyntax-only legacy/billing/PAY.cbl"}, False),
+            # Smoke-test false positives: a commit message, a named -Destination, and Pop-Location.
+            ("powershell", {"command": "git -C modernized/billing-uplifted commit -q -m 'Seed: copy of legacy/billing'"}, False),
+            ("powershell", {"command": "Copy-Item -Destination $tmp -Recurse -Path legacy\\billing\\*"}, False),
+            ("powershell", {"command": "Copy-Item -Destination legacy\\billing -Path notes.txt"}, True),
+            ("powershell", {"command": "Push-Location legacy\\billing; $n = (Get-ChildItem -Recurse).Count; Pop-Location; New-Item -ItemType Directory analysis\\billing\\baseline"}, False),
+            ("powershell", {"command": "Push-Location legacy\\billing; Remove-Item PAY.cbl; Pop-Location"}, True),
+            ("bash", {"command": "git checkout -- legacy/billing/PAY.cbl"}, True),
+            ("bash", {"command": "git --work-tree=legacy/billing checkout ."}, True),
+            ("bash", {"command": "cp -t legacy/billing notes.txt"}, True),
             ("bash", {"command": "mkdir -p legacy && ln -s /work/payroll legacy/payroll"}, False),
             ("bash", {"command": "ln -s /work/other legacy/billing"}, True),
             ("bash", {"command": "mkdir legacy/billing/newdir"}, True),

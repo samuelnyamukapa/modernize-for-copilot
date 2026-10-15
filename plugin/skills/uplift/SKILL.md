@@ -47,7 +47,10 @@ but never build, restore, test or run a migration tool inside it. The plugin's `
 dynamic-workflow agent, and protects `legacy/<system>` and the real folder its symlink or junction points to. Copying the
 legacy code into the working copy (`cp -RH`, `rsync`, `Copy-Item -Recurse`, `robocopy`) is allowed, because the
 destination is outside `legacy/`. A denied write under `legacy/` is expected: that is the guard working. Do not retry
-with another command or tool, and never try to get around it; write to `modernized/` or `analysis/` instead. Never run
+with another command or tool, and never try to get around it; write to `modernized/` or `analysis/` instead.
+One exception: the denial ends with `Matched:` and the part of the command it matched. If that part does not
+write under `legacy/` (a commit message that names it, a copy *from* it), the guard misread a compound command:
+run its steps as separate commands, and if one step is denied on its own, stop and report it. Never run
 this skill in autopilot or with `--yolo` / `--allow-all` (Step 5b says why).
 
 This is **not** `transform`, which extracts intent and rewrites idiomatically. Here the code is good
