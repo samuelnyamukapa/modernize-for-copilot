@@ -26,7 +26,7 @@ copilot plugin install modernize@modernize-for-copilot
 copilot plugin list
 ```
 
-You should see `modernize@modernize-for-copilot (v0.1.0-dev)`. The first line fails harmlessly if the plugin isn't installed.
+You should see `modernize@modernize-for-copilot (v0.1.0)`. The first line fails harmlessly if the plugin isn't installed.
 
 **A3. After each fix is pushed,** close the Copilot sessions and update:
 
