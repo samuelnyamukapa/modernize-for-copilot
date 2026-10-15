@@ -125,7 +125,8 @@ and `cases.json` are the development cases: never touch them.
 
 The pack checks by itself that `legacy/` is untouched (file times against `PREFLIGHT.md`; no version-control tool is run) and lists the
 brief's unticked §7 questions and exit criteria; a person decides those, so never tick one. Write
-`analysis/<system>/equivalence/test-runs.json` once, from what you did in steps 3 and 4 (paths and words only):
+`analysis/<system>/equivalence/test-runs.json` once, from what you did in steps 3 and 4 (paths and words only; the
+date from the system clock, `Get-Date -Format yyyy-MM-dd` or `date +%F`, never from memory):
 
 ```json
 { "date": "YYYY-MM-DD",

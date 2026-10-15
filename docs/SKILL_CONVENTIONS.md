@@ -104,3 +104,7 @@ Keep every other upstream gate word for word.
 ## 9. Checks
 
 `python3 convert/lint.py` must pass. It rejects Claude-only tokens, leftover `$placeholders`, and skill names that don't match their folder.
+
+## 10. Dates
+
+A skill that writes a date takes it from the system clock (`Get-Date -Format yyyy-MM-dd` in PowerShell, `date +%F` elsewhere). In the smoke test the model wrote yesterday's date into INTENT.md and PREFLIGHT.md.

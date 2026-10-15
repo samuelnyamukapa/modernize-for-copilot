@@ -57,7 +57,8 @@ can type any other target.
 ## 4 — Write it down once
 
 Write `analysis/<system>/INTENT.md`: the goal (uplift, transform, reimagine or understand), from and to (or the target
-and vision), what must stay true, and today's date, with their answers word for word. Later skills read it so nobody
+and vision), what must stay true, and today's date, with their answers word for word. Take the date from the
+system clock (`Get-Date -Format yyyy-MM-dd` in PowerShell, `date +%F` elsewhere), never from memory. Later skills read it so nobody
 is asked twice: `brief` takes its target stack from it and never overrides it with a guess.
 
 ## 5 — Show the road

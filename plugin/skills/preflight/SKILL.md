@@ -268,7 +268,8 @@ a read-only mount, or a sandbox that blocks shell writes.
 Write `analysis/<system>/PREFLIGHT.md`. **Lead with the Answers section and the
 Check 6 finding** — downstream commands (`brief` above all) read those two.
 Record where the code lives (the `legacy/<system>` link target, or the path in
-`analysis/<system>/SOURCE`).
+`analysis/<system>/SOURCE`). If you date the report, take the date from the system clock (`Get-Date -Format
+yyyy-MM-dd` or `date +%F`), never from memory.
 Then a table, one row per check, status ✅ / ⚠️ / ❌, what was found and the fix
 for anything not green, then a **Ready / Ready-with-gaps / Not ready** verdict per
 command:
