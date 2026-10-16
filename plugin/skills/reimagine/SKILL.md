@@ -97,7 +97,7 @@ authorizes the build-out.
 
 ## Phase E — Parallel scaffolding (only after Phase D approval)
 
-**Preferred: dynamic workflow.** If this session has Copilot dynamic workflows (started with `--experimental`),
+**Preferred: dynamic workflow.** If this session has Copilot dynamic workflows (the Copilot desktop app, or Copilot CLI started with `--experimental`),
 scaffold **every** service in the approved architecture (no cap from this skill; Copilot's run limits apply).
 Tell the user the service count, then run the `modernize-reimagine-scaffold` dynamic workflow (the plugin
 registers it) with these args. The Phase D approval authorizes it. Runs start in the background. Wait for the

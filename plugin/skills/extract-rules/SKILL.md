@@ -26,7 +26,7 @@ The code is `legacy/<system>`, often a symlink to where it really lives: say whe
 
 Decide this first, before building any shard list.
 
-**Preferred: dynamic workflow (Method A).** If this session has Copilot dynamic workflows (started with `--experimental`) and knows the `modernize-extract-rules-mine` workflow (the plugin registers it), use Method A.
+**Preferred: dynamic workflow (Method A).** If this session has Copilot dynamic workflows (the Copilot desktop app, or Copilot CLI started with `--experimental`) and knows the `modernize-extract-rules-mine` workflow (the plugin registers it), use Method A.
 
 **Fallback (Method B).** If dynamic workflows aren't available, or the session does not know that workflow, use Method B. Once a Method A run has started, a run that stops or fails is resumed, not replaced by Method B (Method A, step 3).
 

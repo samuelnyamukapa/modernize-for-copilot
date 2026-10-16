@@ -90,7 +90,7 @@ After each step, tell Claude "B*n* done". Claude reads `D:\githubProjects\modern
 
 ## Part D (later): dynamic workflows
 
-Start the test window with `copilot --experimental` (or run `/experimental on` in an open session), then:
+In the Copilot desktop app workflows are on already. In the CLI, start the test window with `copilot --experimental` (or run `/experimental on` in an open session). Then:
 
 1. `/workflows` should list six `modernize-…` workflows. If it lists fewer, screenshot it: a definition was rejected.
 2. Re-run `/modernize:extract-rules eshop`. It should say it is using the `modernize-extract-rules-mine` workflow (Method A) and show progress in `/workflows`.

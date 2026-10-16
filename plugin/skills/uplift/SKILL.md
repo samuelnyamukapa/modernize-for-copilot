@@ -199,7 +199,7 @@ Build `analysis/<system>/DELTA_CATALOG.md`: the breaking and behavioral changes 
 versions **that this code actually hits**. **Reuse it** if it exists and is newer than the source (the
 brief may have just built it); regenerate only if missing or stale.
 
-**Preferred: dynamic workflow.** If this session has Copilot dynamic workflows (started with `--experimental`), run the
+**Preferred: dynamic workflow.** If this session has Copilot dynamic workflows (the Copilot desktop app, or Copilot CLI started with `--experimental`), run the
 `modernize-uplift-deltas` dynamic workflow (the plugin registers it) with these args. This skill is your authorization to
 run it. Runs start in the background. Wait for the result, then continue from it. To resume a stopped run, open
 `/workflows` and resume it there.
@@ -353,7 +353,7 @@ and `reimagine`) in autopilot or with `--yolo` / `--allow-all`: approving each t
 calls automatically anyway, say so, and treat the resulting diff as untrusted until a person has reviewed it. A denied
 write under `legacy/` is expected and must not be worked around.
 
-**Preferred: dynamic workflow.** If this session has Copilot dynamic workflows (started with `--experimental`), run the
+**Preferred: dynamic workflow.** If this session has Copilot dynamic workflows (the Copilot desktop app, or Copilot CLI started with `--experimental`), run the
 `modernize-uplift-migrate` dynamic workflow (the plugin registers it) with these args. The pilot approval authorizes it.
 Runs start in the background. Wait for the result, then continue from it. To resume a stopped run, open `/workflows` and
 resume it there.

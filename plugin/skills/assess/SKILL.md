@@ -30,7 +30,7 @@ List the immediate subdirectories first (`ls -d <parent-dir>/*/ | xargs -n1 base
 
 ## Survey
 
-**Preferred: dynamic workflow.** If this session has Copilot dynamic workflows (started with `--experimental`), run the `modernize-portfolio-assess` dynamic workflow with args `{ "parentDir": "<parent-dir>", "systems": ["<sub1>", "<sub2>", ...] }`. This skill is your authorization to run it. Runs start in the background. Wait for the result, then continue from it. To resume a stopped run, open `/workflows` and resume it there; systems already surveyed are not surveyed again.
+**Preferred: dynamic workflow.** If this session has Copilot dynamic workflows (the Copilot desktop app, or Copilot CLI started with `--experimental`), run the `modernize-portfolio-assess` dynamic workflow with args `{ "parentDir": "<parent-dir>", "systems": ["<sub1>", "<sub2>", ...] }`. This skill is your authorization to run it. Runs start in the background. Wait for the result, then continue from it. To resume a stopped run, open `/workflows` and resume it there; systems already surveyed are not surveyed again.
 
 The workflow runs one survey agent (`modernize:legacy-analyst`) per system and computes the COCOMO index in code, so every row uses the same formula. It returns:
 

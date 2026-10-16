@@ -54,7 +54,7 @@ commentary.
 
 ## Scan
 
-**Preferred: dynamic workflow.** If this session has Copilot dynamic workflows (started with `--experimental`),
+**Preferred: dynamic workflow.** If this session has Copilot dynamic workflows (the Copilot desktop app, or Copilot CLI started with `--experimental`),
 run the `modernize-harden-scan` dynamic workflow with args `{ "system": "<system>" }`. This skill is your
 authorization to run it. **Tell the user the agent count as a formula, 5 + N + M**: 5 finders, N refuters (one per
 distinct finding), M second judges (one per finding still Critical or High after refutation); N and M are known
