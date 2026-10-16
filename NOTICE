@@ -14,6 +14,10 @@ Modifications made in this repository include, among others:
 - Scripts exposed through an MCP server instead of plugin-root paths.
 - The legacy/ read-only rule enforced by a Copilot preToolUse hook.
 - The live progress pane, its hooks, and usage telemetry removed.
+- A live status canvas for the GitHub Copilot app
+  (plugin/com.github.copilot/extensions/modernize-canvas/). Its readers, treemap,
+  review ledger and sign-off writers are adapted from the upstream plugin's
+  hooks/reader, hooks/map, hooks/review and hooks/sign.ts (Apache-2.0).
 
 This project is not affiliated with or endorsed by Anthropic or GitHub.
 "Claude" is a trademark of Anthropic, PBC. "GitHub" and "Copilot" are

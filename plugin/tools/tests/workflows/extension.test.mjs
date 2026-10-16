@@ -72,7 +72,8 @@ test("every workflow is run by a skill, and every workflow a skill names exists"
         const file = `${SKILLS}${dir}/SKILL.md`;
         if (!existsSync(file)) continue;
         for (const m of readFileSync(file, "utf8").matchAll(/`(modernize-[a-z-]+)`/g)) {
-            if (!["modernize-tools", "modernize-tools-win"].includes(m[1])) named.add(m[1]);
+            // Not workflows: the MCP server's two names and the live status canvas's id.
+            if (!["modernize-tools", "modernize-tools-win", "modernize-status"].includes(m[1])) named.add(m[1]);
         }
     }
     assert.deepEqual([...named].sort(), [...registered].sort());

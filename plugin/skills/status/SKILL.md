@@ -56,7 +56,14 @@ repo)? If `SECRETS.local.md` exists, confirm it is NOT tracked (`git ls-files --
 never committed (`git log --all --oneline -- <path>` should be empty). If either fails, say so prominently and
 recommend rotation and history scrubbing.
 
-## 4 — Verdict
+## 4 — Live status in the Copilot app
+
+In the Copilot desktop app, after the table, open the live status: call the `open_canvas` tool for the canvas
+`modernize-status` with input `{"system": "<system>"}`. It shows the same steps, the map of the code, the verdicts,
+what needs a person and the next command, and it refreshes itself as files change; it never runs a command. This is a
+convenience: if canvases are not available (in the CLI, say), say nothing about it and carry on.
+
+## 5 — Verdict
 
 End with three lines:
 

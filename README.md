@@ -59,6 +59,17 @@ Commands are typed as `/modernize:<step> <system>`, for example `/modernize:asse
 - `git` on `PATH`, which Copilot needs to install plugins from a marketplace.
 - For the fan-out commands, Copilot dynamic workflows (`--experimental`). Without them, the commands fall back to direct subagents.
 
+## Live status in the Copilot app
+
+In the Copilot desktop app the plugin adds a **Modernize** canvas beside the session. `/modernize:status` opens it, or ask Copilot to *open the modernize-status canvas*. For each system it shows:
+
+- the steps done, with what is stale;
+- a map of the code (from `topology.json`, or the legacy folders before the map exists), coloured by progress, with tiles lighting up as agents read or write them;
+- the brief's phases and approval, the built modules with their PROVEN / PARTLY PROVEN / NOT PROVEN verdicts, and the security counts;
+- what needs a person, and the one next command, with a Copy button.
+
+A person can also answer the rules waiting for review there (written to `RULE_REVIEWS.json`, as `/modernize:review` does), and sign the brief's approval block and the verify sign-off. The canvas never runs a command and never writes outside `analysis/<system>/`. It is served from `127.0.0.1` only, behind a random per-session token. In the CLI nothing changes.
+
 ## Troubleshooting
 
 - **`Unknown command: /assess`**: plugin skills are namespaced. Type `/modernize:assess`.
