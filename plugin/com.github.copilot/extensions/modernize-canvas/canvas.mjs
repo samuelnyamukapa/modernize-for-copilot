@@ -10,9 +10,13 @@ const SYSTEM_INPUT = {
     properties: { system: { type: "string", description: "The system's folder name under analysis/ (letters, digits, - and _)." } },
 };
 
-/** The working directory a request names, else this process's. */
+// The directory this process started in, captured when the module loads: extension.mjs moves the
+// process out of the plugin folder afterwards, so process.cwd() is no longer the starting one.
+const STARTED_IN = process.cwd();
+
+/** The working directory a request names, else the one this process started in. */
 export const workspaceOf = (ctx) =>
-    typeof ctx?.session?.workingDirectory === "string" && ctx.session.workingDirectory.trim() !== "" ? ctx.session.workingDirectory : process.cwd();
+    typeof ctx?.session?.workingDirectory === "string" && ctx.session.workingDirectory.trim() !== "" ? ctx.session.workingDirectory : STARTED_IN;
 
 const systemOf = (ctx) => {
     const s = ctx?.input && typeof ctx.input === "object" ? ctx.input.system : undefined;

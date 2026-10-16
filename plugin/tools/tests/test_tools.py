@@ -142,6 +142,20 @@ class ScriptPatchTest(unittest.TestCase):
         self.assertIn("No referee agent checked these citations", text)
 
 
+class WorkingDirectoryTest(unittest.TestCase):
+    def test_server_leaves_the_plugin_folder(self):
+        """Windows cannot update or uninstall a plugin while a process's working directory is inside it."""
+        if not os.path.isdir("/proc/self"):
+            self.skipTest("needs /proc")
+        c = McpClient()
+        try:
+            c.call("initialize", {"protocolVersion": "2025-06-18"})
+            cwd = os.readlink(f"/proc/{c.proc.pid}/cwd")
+            self.assertFalse(os.path.realpath(cwd).startswith(os.path.realpath(PLUGIN)), cwd)
+        finally:
+            c.close()
+
+
 class StandDownTest(unittest.TestCase):
     def test_windows_entry_serves_nothing_off_windows(self):
         if os.name == "nt":

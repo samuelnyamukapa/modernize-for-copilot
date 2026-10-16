@@ -4,6 +4,16 @@
 import { defineWorkflow, joinSession } from "@github/copilot-sdk/extension";
 
 import { definitions } from "./definitions.mjs";
+import os from "node:os";
+
+// Copilot may start this process inside the plugin folder. Windows cannot delete or rename a
+// folder that is a process's working directory, so an open session would block plugin updates
+// and uninstall ("os error 32"). Nothing here needs a working directory: move out of it.
+try {
+    process.chdir(os.tmpdir());
+} catch {
+    // keep the directory we were given
+}
 
 // One definition the SDK rejects must not take the other five down with it: define each
 // on its own and register whatever was accepted. (Copilot then registers them in one

@@ -24,6 +24,7 @@ import re
 import shutil
 import subprocess
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PLUGIN_ROOT = os.path.dirname(HERE)
@@ -417,7 +418,19 @@ def _entry(argv: list[str]) -> str:
 ENTRY = _entry(sys.argv[1:])
 STAND_DOWN = stands_down()
 
+def leave_plugin_dir() -> None:
+    """Copilot starts this server with the plugin folder as its working directory. Windows cannot
+    delete or rename a folder that is some process's working directory, so while a session is open
+    `copilot plugin update` and uninstall fail ("os error 32"). Every tool runs its script with
+    cwd=workspace and every path here is absolute, so the server moves out of the plugin folder."""
+    try:
+        os.chdir(tempfile.gettempdir())
+    except OSError:
+        pass
+
+
 if __name__ == "__main__":
+    leave_plugin_dir()
     stdin = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8", errors="replace")
     stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", newline="\n", write_through=True)
     serve(stdin, stdout)
