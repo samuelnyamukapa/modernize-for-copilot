@@ -38,3 +38,19 @@ That makes about 66 workflow agents in all.
 - **Duplicate deltas:** `uplift-deltas` listed the same issue under several finders. BinaryFormatter, for example, appears as an API-removed delta and as a behavioral one. Like upstream, the workflow removes duplicates only when the name and the code site are both the same, so this is upstream behaviour, not a port bug. `/modernize:uplift` folds them when it writes the catalog.
 - **Playbook gaps:** `uplift-migrate` correctly reported that the hand-written playbook contradicted the delta catalog on BinaryFormatter, and that it left the VAT config file to the host. These are the gaps a real pilot exists to close.
 - **No blockers:** `reimagine-scaffold` raised none, and found no planted instructions in the spec. The invoicing scaffold asked a person to confirm the 30-day boundary of RULE-001.
+
+## The live status canvas, live
+
+Tested on 16 Oct 2026 in the Copilot desktop app on Windows.
+
+**How it was loaded.** The installed copy of `modernize` could not be updated that night: the old version's server and extension processes, started from the plugin folder by sessions still open on the machine, kept Windows from replacing it (os error 32). The canvas extension was therefore loaded from a local marketplace folder (`D:\githubProjects\modernize-canvas-dev`), which the app reads in place. It was removed again after the test. Since 4967c86, the server and extensions move out of the plugin folder when they start, so open sessions no longer block an update.
+
+| Check | Result |
+|---|---|
+| Opening it | The agent opened it with `open_canvas` when asked "Open the modernize-status canvas for system eshop". The app showed the page served from `127.0.0.1` beside the session. |
+| eShop | Uplift track, next command `/modernize:verify eshop`, steps with their ages, the treemap from `topology.json` (33 modules), the plan with its signed approval, both PARTLY PROVEN verdicts with the recorded sign-off, and the security counts 0, 3, 4, 7 |
+| Live activity | When the session read `legacy/eshop/.../PicController.cs` through a shell command, the PicController tile lit blue and the activity list showed the read |
+| Review deck | In the billing fixture, the deck showed RULE-006 (P0, suspected defect). **Not sure** plus a note wrote `RULE_REVIEWS.json` and `RULE_REVIEWS.md` in `/modernize:review`'s format |
+| Approval form | A fixture brief was added while the page was open. The page updated by itself and showed the form. Signing it (test name "Fixture Tester") rewrote only the `Approved by:`/`Date:` and `Approval covers:` lines |
+| Agent action | The agent called the canvas's `summary` action and reported what needed attention |
+| One bug | `analysis/live-tests/` showed up as a system. Fixed in 9aa04e5: an `analysis/` folder now counts as a system only if it holds skill output |
