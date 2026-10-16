@@ -47,14 +47,33 @@ jobs:
       - name: Tag and publish
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.meta.outputs.tag }}
           RELEASE_REF: ${{ inputs.ref }}
           PRERELEASE: ${{ inputs.prerelease }}
         run: |
-          if git ls-remote --exit-code --tags origin "refs/tags/${{ steps.meta.outputs.tag }}" >/dev/null; then
-            echo "::error::${{ steps.meta.outputs.tag }} already exists"; exit 1
+          target=$(git rev-parse HEAD)
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "::error::Release $TAG already exists"; exit 1
+          fi
+          # A tag pushed by hand is fine, as long as it points at the commit being released.
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            git fetch --quiet --depth=1 origin "refs/tags/$TAG:refs/tags/$TAG"
+            tagged=$(git rev-list -n 1 "$TAG")
+            if [ "$tagged" != "$target" ]; then
+              echo "::error::Tag $TAG points at $tagged, not $target"; exit 1
+            fi
+            echo "Tag $TAG already exists on $target; publishing its release."
           fi
           flags=""
           if [ "$PRERELEASE" = "true" ]; then flags="--prerelease"; fi
           if [ -n "$RELEASE_REF" ]; then flags="$flags --latest=false"; fi
-          gh release create "${{ steps.meta.outputs.tag }}" --target "$(git rev-parse HEAD)" \
-            --title "${{ steps.meta.outputs.tag }}" --notes-file notes.md $flags
+          if ! gh release create "$TAG" --target "$target" --title "$TAG" --notes-file notes.md $flags 2>err.txt; then
+            cat err.txt
+            echo "::error::gh release create failed: $(tr '\n' ' ' < err.txt)"
+            # The workflow token may not create a tag on a commit whose workflow files differ from
+            # the default branch's. Push that tag yourself, then run this again with the same ref.
+            if grep -q "not accessible by integration" err.txt; then
+              echo "::error::Push the tag yourself (git tag -a $TAG $target -m $TAG; git push origin $TAG), then run this workflow again with the same ref."
+            fi
+            exit 1
+          fi

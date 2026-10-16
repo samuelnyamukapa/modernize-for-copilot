@@ -71,5 +71,5 @@ Upstream's live pane (estate map, review deck, sign dialog) was dropped for v0.1
   - a test folder was listed as a system. Fixed in `9aa04e5`, with a regression test.
 - **Docs and 1.0.0:** done; see [CHANGELOG.md](../CHANGELOG.md).
 - **Tags and releases:** still Sam's step for both versions. Actions › release › Run workflow:
-  - first with `ref` set to `d9f444e6eed4c67ad2dea806d728d86aa6fb89e0`, for v0.1.0;
-  - then with `ref` empty, for v1.0.0.
+  - with `ref` empty, for v1.0.0;
+  - for v0.1.0, push the tag from a clone first (`git tag -a v0.1.0 d9f444e6eed4c67ad2dea806d728d86aa6fb89e0 -m v0.1.0; git push origin v0.1.0`), then run it with `ref` set to that SHA. The first try, on 16 Oct, failed with "Resource not accessible by integration": the workflow's token may not create a tag on a commit whose workflow files differ from `main`'s. The workflow now publishes the release for a tag that already exists.
