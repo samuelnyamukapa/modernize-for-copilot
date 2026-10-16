@@ -392,4 +392,4 @@ There is one milestone per phase. Labels: `phase-0` … `phase-6`, `needs-sam` (
 
 - **The live status canvas (#16) is done.** It ran live in the Copilot desktop app; see [WORKFLOW_LIVE_TESTS.md](WORKFLOW_LIVE_TESTS.md).
 - **Version 1.0.0 is on `main`.** [CHANGELOG.md](../CHANGELOG.md) lists what is verified, and what is not yet.
-- **Tags and releases:** the tags and Releases for 0.1.0 and 1.0.0 are made from Actions › release; see [V1_PLAN.md](V1_PLAN.md).
+- **Tags and releases:** v0.1.0 and v1.0.0 are published, with v1.0.0 as Latest; see [V1_PLAN.md](V1_PLAN.md).
