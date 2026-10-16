@@ -377,3 +377,11 @@ There is one milestone per phase. Labels: `phase-0` … `phase-6`, `needs-sam` (
 - **Phase 5:** `/modernize:uplift` is written (pilot, playbook, batches, circuit breaker, proof pack); `/modernize:reimagine` was already in.
 - **Guard:** build and migration tools pointed at `legacy/` (`dotnet restore|build|test`, `msbuild`, `nuget restore`, `mvn`, `gradle`, `npm ci`, `upgrade-assistant upgrade` …) are now denied as writes. Read-only uses (`dotnet list`, `upgrade-assistant analyze`, `cobc -fsyntax-only`) stay allowed. Preflight's Level 2 build smoke test now says to build in a scratch copy.
 - **Still unverified on a real install:** that Copilot accepts the `anyOf` root in four `argsSchema`s (the documented subset includes `anyOf`, and the per-module tests check every keyword against it), and the whole `--experimental` path end to end.
+
+## Update, 16 Oct 2026 (v0.1.0 published, live workflows)
+
+- **v0.1.0 is on `main`**, which is what the marketplace serves. Pushing the tag and creating the GitHub Release need a maintainer: Claude's session gets HTTP 403 for both. `.github/workflows/release.yml` does both from the Actions tab.
+- **All six dynamic workflows have run live** in the Copilot desktop app, with no `--experimental` switch there; see [WORKFLOW_LIVE_TESTS.md](WORKFLOW_LIVE_TESTS.md).
+- **Spike check 8, desktop app parity, passed.** The app shares the CLI's plugin setup.
+- **CardDemo:** `start`, `preflight`, `assess` and `map` passed in the app.
+- **Next:** the live status canvas (#16), then 1.0.0.
