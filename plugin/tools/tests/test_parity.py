@@ -168,7 +168,7 @@ class RunTests(unittest.TestCase):
             json.dump(data, fh)
 
     def manifest(self):
-        with open(os.path.join(self.dir, "parity.json"), encoding="utf-8") as fh:
+        with open(os.path.join(self.dir, "config.json"), encoding="utf-8") as fh:
             return json.load(fh)
 
     def test_end_to_end(self):
@@ -177,7 +177,7 @@ class RunTests(unittest.TestCase):
             m = self.manifest()
             m["contracts"] = [{"name": "openapi", "kind": "openapi", "path": "/swagger.json"},
                               {"name": "billing-wsdl", "kind": "wsdl", "path": "/svc?singleWsdl"}]
-            self.write("parity.json", m)
+            self.write("config.json", m)
             self.write("cases.json", [
                 {"id": "CASE-001", "method": "GET", "path": "/api/same"},
                 {"id": "CASE-002", "method": "GET", "path": "/api/invoices/42"},
@@ -202,6 +202,9 @@ class RunTests(unittest.TestCase):
         self.assertEqual(contracts["billing-wsdl"]["result"], "BREAKING")  # target namespace changed
         with open(os.path.join(self.dir, "PARITY.md"), encoding="utf-8") as fh:
             report = fh.read()
+        names = [n.lower() for n in os.listdir(self.dir)]   # Windows and macOS ignore case
+        self.assertEqual(len(names), len(set(names)))
+        self.assertEqual(parity.load_manifest(self.ws, "billing")["legacy"]["base_url"], legacy)
         self.assertIn("**Verdict: NO PARITY**", report)
         self.assertIn("## Sign-off", report)
 
@@ -211,7 +214,7 @@ class RunTests(unittest.TestCase):
             m = self.manifest()
             m["overrides"] = [{"path": "/api/total", "match": "semantic"}]
             m["scrub"]["json_paths"] = ["$..generatedAt"]
-            self.write("parity.json", m)
+            self.write("config.json", m)
             self.write("cases.json", [{"id": "CASE-001", "method": "GET", "path": "/api/invoices/42"},
                                       {"id": "CASE-002", "method": "GET", "path": "/api/total"}])
             self.write("deltas.json", [
@@ -231,7 +234,7 @@ class RunTests(unittest.TestCase):
             self.assertEqual(parity.run(self.ws, "billing", allow_unsafe=True)["cases"][0]["result"], "SKIPPED")
             m = self.manifest()
             m["allow_unsafe_methods"] = True
-            self.write("parity.json", m)
+            self.write("config.json", m)
             self.assertEqual(parity.run(self.ws, "billing")["cases"][0]["result"], "SKIPPED")
             self.assertEqual(parity.run(self.ws, "billing", allow_unsafe=True)["cases"][0]["result"], "MATCH")
             self.write("cases.json", [{"id": "CASE-001", "method": "GET", "path": "//evil.example/x"}])
@@ -243,7 +246,7 @@ class RunTests(unittest.TestCase):
             parity.init(self.ws, "billing", legacy, candidate)
             m = self.manifest()
             m["match"] = "semantic"
-            self.write("parity.json", m)
+            self.write("config.json", m)
             self.write("cases.json", [{"id": "CASE-001", "method": "GET", "path": "/api/invoices/42"}])
             self.write("deltas.json", [{"id": "DELTA-001", "case": "*", "where": "$.InvoiceId"}, {"id": "DELTA-002", "case": "*", "where": "$.invoiceId"},
                                        {"id": "DELTA-003", "case": "*", "where": "$.Total"}, {"id": "DELTA-004", "case": "*", "where": "$.total"}])
@@ -271,7 +274,7 @@ class RunTests(unittest.TestCase):
             parity.init(self.ws, "billing", *(f"http://127.0.0.1:{s.server_address[1]}" for s in srvs))
             m = self.manifest()
             m["headers_from_env"] = {"Authorization": "PARITY_TEST_TOKEN"}
-            self.write("parity.json", m)
+            self.write("config.json", m)
             self.write("cases.json", [{"id": "CASE-001", "method": "GET", "path": "/"}])
             os.environ["PARITY_TEST_TOKEN"] = "Bearer s3cr3t"
             try:

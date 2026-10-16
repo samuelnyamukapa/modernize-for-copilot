@@ -3,7 +3,8 @@
 Standard library only. The modernize-tools server imports this module; the tests import it
 directly. Everything lives under analysis/<system>/parity/:
 
-  parity.json    the manifest: both base URLs, contracts, scrub and compare rules
+  config.json    the settings: both base URLs, contracts, scrub and compare rules
+                 (not parity.json: on Windows that is the same file as PARITY.json)
   cases.json     the requests to replay (imported from HAR files or written by hand)
   deltas.json    approved differences: the diff expects them and reports them as such
   results/       one file per case and side, plus the fetched contracts
@@ -107,16 +108,16 @@ def init(ws: str, system: str, legacy_url: str, candidate_url: str) -> dict:
     d = parity_dir(ws, system)
     os.makedirs(d, exist_ok=True)
     written, kept = [], []
-    manifest_path = os.path.join(d, "parity.json")
+    manifest_path = os.path.join(d, "config.json")
     if os.path.isfile(manifest_path):
         manifest = _read_json(manifest_path)
         manifest.setdefault("legacy", {})["base_url"] = legacy_url
         manifest.setdefault("candidate", {})["base_url"] = candidate_url
         _write_json(manifest_path, manifest)
-        kept.append("parity.json (base URLs updated)")
+        kept.append("config.json (base URLs updated)")
     else:
         _write_json(manifest_path, default_manifest(system, legacy_url, candidate_url))
-        written.append("parity.json")
+        written.append("config.json")
     for name, empty in (("cases.json", []), ("deltas.json", [])):
         p = os.path.join(d, name)
         if os.path.isfile(p):
@@ -128,9 +129,9 @@ def init(ws: str, system: str, legacy_url: str, candidate_url: str) -> dict:
 
 
 def load_manifest(ws: str, system: str) -> dict:
-    m = _read_json(os.path.join(parity_dir(ws, system), "parity.json"))
+    m = _read_json(os.path.join(parity_dir(ws, system), "config.json"))
     if not isinstance(m, dict):
-        raise ParityError("parity.json must hold a JSON object.")
+        raise ParityError("config.json must hold a JSON object.")
     m["legacy"] = {**m.get("legacy", {}), "base_url": _check_base_url((m.get("legacy") or {}).get("base_url"), "legacy.base_url")}
     m["candidate"] = {**m.get("candidate", {}), "base_url": _check_base_url((m.get("candidate") or {}).get("base_url"), "candidate.base_url")}
     if m.get("match", "exact") not in MATCH_LEVELS:
@@ -699,7 +700,7 @@ def run(ws: str, system: str, allow_unsafe: bool = False, only: list[str] | None
         entry = {"id": case["id"], "name": case.get("name") or f"{method} {case.get('path')}", "method": method,
                  "path": case.get("path"), "match": match_for(case, manifest)}
         if not safe and not unsafe_ok:
-            entry.update(result="SKIPPED", why="changes data: needs allow_unsafe_methods in parity.json and allow_unsafe on this run")
+            entry.update(result="SKIPPED", why="changes data: needs allow_unsafe_methods in config.json and allow_unsafe on this run")
             case_results.append(entry)
             continue
         legacy = send(opener, manifest["legacy"]["base_url"], case, extra, timeout)
@@ -779,7 +780,7 @@ def render_report(r: dict) -> str:
             found = "; ".join(f["what"] for f in k["findings"]) or "none"
             lines.append(f"| {_cell(k['name'])} | {_cell(k['kind'])} | {k['result']} | {_cell(found)} |")
     else:
-        lines.append("No contracts are listed in parity.json, so none were checked.")
+        lines.append("No contracts are listed in config.json, so none were checked.")
     lines += ["", "## Cases", "", "| Case | Request | Match level | Result |", "| --- | --- | --- | --- |"]
     for x in r["cases"]:
         lines.append(f"| {x['id']} | {_cell(x['name'])} | {x['match']} | {x['result']}{(' — ' + _cell(x['why'])) if x.get('why') else ''} |")

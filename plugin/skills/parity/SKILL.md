@@ -34,17 +34,17 @@ Both systems must be running. This skill never builds or starts the legacy code 
 
 Take the base URLs from the arguments. Otherwise ask for them with `ask_user`: "What is the base URL of the running legacy system, and of the new one?" If either is not a local or test address, ask: "Is this a test environment with test data?" and stop unless the answer is yes. Headless with no URLs: stop and say which arguments are needed.
 
-Call `parity_init` with {workspace, system: "<system>", legacy_url, candidate_url}. It writes `analysis/<system>/parity/parity.json`, `cases.json` and `deltas.json`, and keeps any that already exist.
+Call `parity_init` with {workspace, system: "<system>", legacy_url, candidate_url}. It writes `analysis/<system>/parity/config.json`, `cases.json` and `deltas.json`, and keeps any that already exist.
 
 ## 2 — The contracts consumers rely on
 
-List each contract the system publishes, from `ASSESSMENT.md`, `topology.json` and the code: for example `/swagger/v1/swagger.json`, `/Service.svc?singleWsdl`, or an XSD. Add each one to `contracts` in `parity.json` as `{"name": "...", "kind": "openapi" | "wsdl" | "xsd" | "text", "path": "/..."}`. The path must be served by both systems. A contract file that only exists on disk (a YAML OpenAPI document, say) is out of scope here: if `oasdiff` is installed, suggest the user runs `oasdiff breaking <legacy file> <new file>` and records the result.
+List each contract the system publishes, from `ASSESSMENT.md`, `topology.json` and the code: for example `/swagger/v1/swagger.json`, `/Service.svc?singleWsdl`, or an XSD. Add each one to `contracts` in `config.json` as `{"name": "...", "kind": "openapi" | "wsdl" | "xsd" | "text", "path": "/..."}`. The path must be served by both systems. A contract file that only exists on disk (a YAML OpenAPI document, say) is out of scope here: if `oasdiff` is installed, suggest the user runs `oasdiff breaking <legacy file> <new file>` and records the result.
 
 The default for every contract is no change at all. `parity_run` reports each one as IDENTICAL, EQUIVALENT, COMPATIBLE (only additions), BREAKING or REVIEW.
 
 ## 3 — How strict each boundary is
 
-`parity.json` sets one match level for everything (`"match": "exact"`) and lets a person loosen it per path with `overrides`, such as `{"path": "/api/admin/*", "match": "semantic"}`. A case can also carry its own `match`.
+`config.json` sets one match level for everything (`"match": "exact"`) and lets a person loosen it per path with `overrides`, such as `{"path": "/api/admin/*", "match": "semantic"}`. A case can also carry its own `match`.
 
 | Level | What must match |
 |---|---|
@@ -64,7 +64,7 @@ Gather cases from these sources, best first:
 2. **The contract and the rules.** For each operation in the contracts, and each rule in `BUSINESS_RULES.md` that an API exposes, write cases into `cases.json`: a normal value, the boundary values the rule names, an unknown id, and a bad input. Give each case a `name` that says what it checks, such as "RULE-007 late fee at exactly 30 days".
 3. **The user.** Ask for the requests they care most about.
 
-If a request needs a token, never write the token into a case. Add `"headers_from_env": {"Authorization": "PARITY_AUTH"}` to `parity.json` and ask the user to set that environment variable before the run.
+If a request needs a token, never write the token into a case. Add `"headers_from_env": {"Authorization": "PARITY_AUTH"}` to `config.json` and ask the user to set that environment variable before the run.
 
 Show the case list (id, method, path, name) and say how many change data.
 
@@ -73,7 +73,7 @@ Show the case list (id, method, path, name) and say how many change data.
 GET, HEAD and OPTIONS are replayed. Other methods are skipped, unless both of these hold:
 
 - the user has said, in this session, that both systems use disposable test data that starts from the same state; and
-- `parity.json` has `"allow_unsafe_methods": true`, and you pass `allow_unsafe: true` to `parity_run`.
+- `config.json` has `"allow_unsafe_methods": true`, and you pass `allow_unsafe: true` to `parity_run`.
 
 A SOAP call is a POST, even when it only reads. A person may mark such a case `"safe": true` after confirming that the operation changes nothing. Ask with `ask_user`, listing the operations. Headless: skip them.
 
@@ -88,11 +88,11 @@ Call `parity_run` with {workspace, system} (add `allow_unsafe` only as step 5 al
 
 Then go through the differences with the user, grouped by `where`:
 
-- **Probably noise** (listed in the report: timestamps, GUIDs and similar on both sides). Ask the user whether to scrub each path. With a yes, add it to `scrub.json_paths` (or `scrub.xml_ignore`, or a `scrub.regex` entry) in `parity.json`.
+- **Probably noise** (listed in the report: timestamps, GUIDs and similar on both sides). Ask the user whether to scrub each path. With a yes, add it to `scrub.json_paths` (or `scrub.xml_ignore`, or a `scrub.regex` entry) in `config.json`.
 - **An intended change** (a fix, or a format change consumers have agreed to). Record it in `deltas.json` only when a named person approves it in this session: `{"id": "DELTA-001", "case": "*" or a case id, "where": "<the where value from the report>", "reason": "...", "approved_by": "<their name>", "date": "<today>"}`. Take the date from the system clock (`Get-Date -Format yyyy-MM-dd` in PowerShell, `date +%F` elsewhere).
 - **A defect in the new system.** Leave it as a difference. Name the case and the place, and hand it to the build step that owns it.
 
-Re-run `parity_run` after every change to `parity.json` or `deltas.json`. Report any delta the report lists as matching nothing.
+Re-run `parity_run` after every change to `config.json` or `deltas.json`. Report any delta the report lists as matching nothing.
 
 ## 7 — Sign-off
 
