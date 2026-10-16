@@ -3,7 +3,8 @@ name: release
 # Run by hand (Actions › release › Run workflow) to tag the version in plugin/plugin.json
 # and publish a GitHub Release whose notes are that version's section of CHANGELOG.md.
 # To release an earlier commit, give its full SHA as `ref`: the version, notes and tag all
-# come from that commit, and the release is not marked Latest.
+# come from that commit, and the release is not marked Latest. With `ref` empty, the tag goes
+# on the head of the branch you run it on, so run it once CI on that commit is green.
 on:
   workflow_dispatch:
     inputs:
@@ -46,12 +47,14 @@ jobs:
       - name: Tag and publish
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_REF: ${{ inputs.ref }}
+          PRERELEASE: ${{ inputs.prerelease }}
         run: |
           if git ls-remote --exit-code --tags origin "refs/tags/${{ steps.meta.outputs.tag }}" >/dev/null; then
             echo "::error::${{ steps.meta.outputs.tag }} already exists"; exit 1
           fi
           flags=""
-          if [ "${{ inputs.prerelease }}" = "true" ]; then flags="--prerelease"; fi
-          if [ -n "${{ inputs.ref }}" ]; then flags="$flags --latest=false"; fi
+          if [ "$PRERELEASE" = "true" ]; then flags="--prerelease"; fi
+          if [ -n "$RELEASE_REF" ]; then flags="$flags --latest=false"; fi
           gh release create "${{ steps.meta.outputs.tag }}" --target "$(git rev-parse HEAD)" \
             --title "${{ steps.meta.outputs.tag }}" --notes-file notes.md $flags

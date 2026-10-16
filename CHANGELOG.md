@@ -12,7 +12,7 @@ Since 0.1.0, every dynamic workflow has run live, and upstream's live pane is ba
 
   It also has two places where a person writes:
   - **a review deck**, which writes `RULE_REVIEWS.json` and `RULE_REVIEWS.md` in `/modernize:review`'s format;
-  - **a sign-off form** for the brief and `VERIFICATION.md`, which rewrites only the approval lines.
+  - **a sign-off form**, which fills in the brief's `Approved by:`, `Date:` and `Approval covers:` lines, or the cells of `VERIFICATION.md`'s sign-off table, and nothing else.
 
   The agent can call three actions: `summary`, `show_system` and `refresh`. `/modernize:status` opens the canvas in the app; in the CLI it shows the table only.
 
@@ -20,7 +20,8 @@ Since 0.1.0, every dynamic workflow has run live, and upstream's live pane is ba
   - never runs commands, and never writes under `legacy/`;
   - escapes everything it shows;
   - needs a random token for every request;
-  - accepts only JSON POSTs of up to 64 KB from its own origin and host, under a strict Content Security Policy.
+  - accepts only JSON POSTs of up to 64 KB, addressed to its own host and, when the browser sends an `Origin`, from its own origin;
+  - is served under a strict Content Security Policy.
 - **`.github/workflows/release.yml`**, run by hand from the Actions tab. It tags the version in `plugin.json` and publishes a GitHub Release, with that version's section of this file as its notes.
 
 ### Changed
@@ -34,7 +35,12 @@ Since 0.1.0, every dynamic workflow has run live, and upstream's live pane is ba
 
 ### Verified
 
-- **All six dynamic workflows ran live** in the Copilot desktop app on Windows, each on its first attempt and in about 66 workflow agents in all. They ran on a small .NET Framework fixture, apart from `harden-scan`, which ran on eShop. Nothing under `legacy/` changed. Run ids and results are in [docs/WORKFLOW_LIVE_TESTS.md](docs/WORKFLOW_LIVE_TESTS.md).
+- **All six dynamic workflows ran live** in the Copilot desktop app on Windows, in about 66 workflow agents in all:
+  - `harden-scan` ran on eShop on the night of 15 Oct;
+  - the other five ran on a small .NET Framework fixture on 16 Oct, each on its first attempt;
+  - nothing under `legacy/` changed.
+
+  Run ids and results are in [docs/WORKFLOW_LIVE_TESTS.md](https://github.com/samuelnyamukapa/modernize-for-copilot/blob/main/docs/WORKFLOW_LIVE_TESTS.md).
 
   | Workflow | Result |
   |---|---|
@@ -44,25 +50,33 @@ Since 0.1.0, every dynamic workflow has run live, and upstream's live pane is ba
   | `uplift-migrate` | two projects built on net8.0 |
   | `reimagine-scaffold` | two services, each written only to its own folder |
   | `harden-scan` | 16 findings judged, none unverified |
-- **The canvas, live in the app:**
-  - opened by the agent with `open_canvas`;
+- **The canvas, live in the app.** The build tested is 1.0.0's, except for the fix to the bug below. It was loaded from a local folder, because the installed 0.1.0 was locked. In that test it was:
+  - opened by the agent with `open_canvas`, when asked for it;
   - showed eShop's full state;
   - lit a module tile when the session read one of its files;
   - wrote a rule verdict;
   - updated by itself when a brief appeared, then wrote a test sign-off;
   - answered the `summary` action.
 
-  One bug was found (a test folder shown as a system) and fixed.
-- **CardDemo (COBOL, 106 programs and copybooks):** `assess`, and `map --no-describe` (166 nodes, 189 edges).
+  The test found two bugs:
+  - a test folder was shown as a system; fixed;
+  - the locked install (see Windows updates above).
+- **CardDemo (COBOL):** `assess` (about 51K lines: 106 COBOL programs and copybooks, plus 55 JCL jobs), and `map --no-describe` (166 modules, 189 edges).
+- **A fresh install of 1.0.0** from the marketplace, with Copilot CLI 1.0.98 on Linux and an empty Copilot home: 13 skills and both extensions.
 - **CI on Ubuntu and Windows:**
-  - guard self-test, structure lint and converter drift;
-  - 21 MCP and guard tests, 259 upstream script tests, 96 workflow tests and 55 canvas tests;
+  - the guard self-test and structure lint;
+  - 21 MCP and guard tests, 96 workflow tests and 55 canvas tests;
+  - 259 upstream script tests, 17 of which are skipped on Windows (`convert/windows-test-gaps.txt`);
   - the check against the real SDK.
+
+  The converter drift check runs on Ubuntu only.
 
 ### Not yet verified
 
 - **The `reimagine` skill end to end.** Its `modernize-reimagine-scaffold` workflow ran live, but from a hand-written spec.
 - **CardDemo past `map`:** rules, brief and transform on COBOL.
+- **The modernize workflows in Copilot CLI** with `--experimental`. Only the spike's probe workflow has run there.
+- **`/modernize:status` opening the canvas itself.** In the live test the agent was asked for the canvas directly.
 - **An in-place update from 0.1.0 to 1.0.0 in the app.** It needs every Copilot window closed first; see above.
 - **Whether open sessions still block updates on Windows.** The MCP server is started through the `py` launcher, which waits for the server and may keep the plugin folder busy even after the server leaves it. Until this is checked, close every Copilot window before updating on Windows.
 - **The canvas on macOS and Linux.** It was tested on Windows only.

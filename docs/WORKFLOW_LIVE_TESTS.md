@@ -1,6 +1,8 @@
 # Dynamic workflows: live test results
 
-All six workflows ran live in the **GitHub Copilot desktop app on Windows** on 16 Oct 2026, with Claude Sonnet 5.5. Every run completed on its first attempt.
+All six workflows ran live in the **GitHub Copilot desktop app on Windows**, with Claude Sonnet 5.5:
+- `modernize-harden-scan` ran on eShop on the night of 15 Oct 2026, from `/modernize:harden`;
+- the other five ran on 16 Oct, each completing on its first attempt.
 
 - **Driving the app:** Claude drove it by computer use.
 - **Starting the runs:** each workflow was started from a prompt in an ordinary session ("Run the modernize-… dynamic workflow with args …"). The app needed no `--experimental` switch.
@@ -43,7 +45,7 @@ That makes about 66 workflow agents in all.
 
 Tested on 16 Oct 2026 in the Copilot desktop app on Windows.
 
-**How it was loaded.** The installed copy of `modernize` could not be updated that night: the old version's server and extension processes, started from the plugin folder by sessions still open on the machine, kept Windows from replacing it (os error 32). The canvas extension was therefore loaded from a local marketplace folder (`D:\githubProjects\modernize-canvas-dev`), which the app reads in place. It was removed again after the test. Since 4967c86, the server and extensions move out of the plugin folder when they start. Whether that is enough on Windows is not yet checked: the `py` launcher that starts the server may still hold the folder.
+**How it was loaded.** The files tested are 1.0.0's, apart from `reader.mjs`, which got the fix for the bug below. The installed copy of `modernize` could not be updated that night: the old version's server and extension processes, started from the plugin folder by sessions still open on the machine, kept Windows from replacing it (os error 32). The canvas extension was therefore loaded from a local marketplace folder (`D:\githubProjects\modernize-canvas-dev`), which the app reads in place. It was removed again after the test. Since 4967c86, the server and extensions move out of the plugin folder when they start. Whether that is enough on Windows is not yet checked: the `py` launcher that starts the server may still hold the folder.
 
 | Check | Result |
 |---|---|

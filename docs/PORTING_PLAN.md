@@ -383,7 +383,9 @@ There is one milestone per phase. Labels: `phase-0` … `phase-6`, `needs-sam` (
 - **v0.1.0 is on `main`**, which is what the marketplace serves. Pushing the tag and creating the GitHub Release need a maintainer: Claude's session gets HTTP 403 for both. `.github/workflows/release.yml` does both from the Actions tab.
 - **All six dynamic workflows have run live** in the Copilot desktop app, with no `--experimental` switch there; see [WORKFLOW_LIVE_TESTS.md](WORKFLOW_LIVE_TESTS.md).
 - **Spike check 8, desktop app parity, passed.** The app shares the CLI's plugin setup.
-- **CardDemo:** `start`, `preflight`, `assess` and `map` passed in the app.
+- **CardDemo:** `start`, `preflight`, `assess` and `map --no-describe` passed in the app:
+  - `assess` found about 51K lines: 106 COBOL programs and copybooks, plus 55 JCL jobs;
+  - `map` found 166 modules and 189 edges.
 - **Next:** the live status canvas (#16), then 1.0.0.
 
 ## Update, 16 Oct 2026 (1.0.0)

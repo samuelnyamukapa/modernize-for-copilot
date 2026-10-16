@@ -11,7 +11,7 @@ Point Copilot at a legacy codebase (COBOL, legacy Java/C++/.NET, monolith web ap
 
 This is a community port of Anthropic's [`code-modernization`](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-modernization) plugin for Claude Code. It is released under the same Apache 2.0 licence. It is not affiliated with or endorsed by Anthropic or GitHub. See [NOTICE](NOTICE).
 
-> **Status: 1.0.** Every skill, all six dynamic workflows and the live status canvas have run on real code in Copilot CLI and the Copilot desktop app on Windows. The evidence is in [CHANGELOG.md](CHANGELOG.md), [docs/WORKFLOW_LIVE_TESTS.md](docs/WORKFLOW_LIVE_TESTS.md) and [docs/SPIKE.md](docs/SPIKE.md). Read the "Not yet verified" list in the changelog before relying on it, and review every change it proposes: proof that new code behaves like the old is evidence for a person to judge, not a guarantee.
+> **Status: 1.0.** On Windows, every skill except `reimagine` has run on a real legacy app (eShopLegacyMVC) in Copilot CLI and the Copilot desktop app. All six dynamic workflows and the live status canvas have run in the desktop app, mostly on a small test fixture. The evidence is in [CHANGELOG.md](CHANGELOG.md), [docs/WORKFLOW_LIVE_TESTS.md](docs/WORKFLOW_LIVE_TESTS.md) and [docs/SPIKE.md](docs/SPIKE.md). Read the "Not yet verified" list in the changelog before relying on it, and review every change it proposes: proof that new code behaves like the old is evidence for a person to judge, not a guarantee.
 
 ## How it works
 
@@ -48,11 +48,11 @@ copilot plugin marketplace add samuelnyamukapa/modernize-for-copilot
 copilot plugin install modernize@modernize-for-copilot
 ```
 
-**Copilot desktop app:** Customize › Add plugin › Manage marketplaces, add `samuelnyamukapa/modernize-for-copilot`, then install **modernize** from Browse all plugins. The app and the CLI share installed plugins, so installing in one is enough.
+**Copilot desktop app:** the app and the CLI share installed plugins, so installing in one is enough. To do it in the app, open Customize, add the marketplace `samuelnyamukapa/modernize-for-copilot` (Manage marketplaces), then install **modernize** from it.
 
-**Updating:** `copilot plugin update modernize@modernize-for-copilot`, or **Update plugin** in the app. On Windows, close every Copilot window (CLI and app) first: a running session can keep the plugin folder busy, and the update then fails with "being used by another process".
+**Updating:** `copilot plugin marketplace update modernize-for-copilot`, then `copilot plugin update modernize@modernize-for-copilot`. In the app: Customize › Installed › modernize › **Update plugin**. On Windows, close every Copilot window (CLI and app) first: a running session can keep the plugin folder busy, and the update then fails with "being used by another process".
 
-**Working on the plugin itself:** `copilot --plugin-dir <clone>/plugin` loads a clone into one CLI session. In the app, add the clone's folder as a marketplace (Manage marketplaces accepts a local path); the app reads it in place, so edits take effect in the next session.
+**Working on the plugin itself:** `copilot --plugin-dir <clone>/plugin` loads a clone into one CLI session. In the app, add the clone's folder as a marketplace (Manage marketplaces accepts a local path); the app reads it in place, so edits take effect in the next session. Uninstall the marketplace copy first in either case, or the plugin loads twice.
 
 Commands are typed as `/modernize:<step> <system>`, for example `/modernize:assess billing`.
 
@@ -60,7 +60,6 @@ Commands are typed as `/modernize:<step> <system>`, for example `/modernize:asse
 - Python 3.9+ on `PATH`. The bundled scripts use the standard library only.
 - `git` on `PATH`, which Copilot needs to install plugins from a marketplace.
 - For the fan-out commands, Copilot dynamic workflows. The Copilot app has them; in the CLI, start with `copilot --experimental`. Without them, the commands fall back to direct subagents.
-- A paid Copilot plan if you want to pick a Claude model, which the prompts were written for. Free and Student plans get Auto only.
 
 ## Live status in the Copilot app
 
@@ -71,7 +70,7 @@ In the Copilot desktop app the plugin adds a **Modernize** canvas beside the ses
 - the brief's phases and approval, the built modules with their PROVEN / PARTLY PROVEN / NOT PROVEN verdicts, and the security counts;
 - what needs a person, and the one next command, with a Copy button.
 
-A person can also answer the rules waiting for review there (written to `RULE_REVIEWS.json`, as `/modernize:review` does), and sign the brief's approval block and the verify sign-off. The canvas never runs a command and never writes outside `analysis/<system>/`. It is served from `127.0.0.1` only, behind a random per-session token. In the CLI nothing changes.
+A person can also answer the rules waiting for review there (written to `RULE_REVIEWS.json`, as `/modernize:review` does), and sign the brief's approval block and the verify sign-off. The canvas never runs a command and never writes outside `analysis/<system>/`. It is served from `127.0.0.1` only, and every request needs a random token. In the CLI nothing changes.
 
 ## Troubleshooting
 
@@ -91,4 +90,4 @@ A person can also answer the rules waiting for review there (written to `RULE_RE
 
 ## Contributing
 
-Before opening a pull request, run what CI runs: `python3 plugin/tools/guard.py --self-test`, `python3 convert/lint.py`, `python3 -m unittest discover -s plugin/tools/tests`, `python3 -m unittest discover -s plugin/scripts/tests`, and `node convert/ci_node_tests.mjs "plugin/tools/tests/workflows/*.test.mjs" "plugin/tools/tests/canvas/*.test.mjs"`. Files under `plugin/scripts`, `plugin/assets` and `plugin/com.github.copilot/agents` are generated by `convert/sync.py`. Change the converter, not the output.
+Before opening a pull request, run what CI runs: `python3 plugin/tools/guard.py --self-test`, `python3 convert/lint.py`, `python3 -m unittest discover -s plugin/tools/tests`, `python3 -m unittest discover -s plugin/scripts/tests`, `node convert/ci_node_tests.mjs "plugin/tools/tests/workflows/*.test.mjs" "plugin/tools/tests/canvas/*.test.mjs"`, and `python3 convert/sync.py` followed by `git diff --exit-code` (the converter drift check). CI also checks the extensions against the real SDK: `npm install --no-save --no-package-lock --ignore-scripts @github/copilot-sdk@1` in `convert/`, then `node check_sdk.mjs`. Files under `plugin/scripts`, `plugin/assets` and `plugin/com.github.copilot/agents` are generated by `convert/sync.py`. Change the converter, not the output.
