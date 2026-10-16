@@ -40,6 +40,7 @@ presence and modification time:
 | verify | `VERIFICATION.md` (written by `/modernize:verify`): the verdict per built module (PROVEN, PARTLY PROVEN or NOT PROVEN) and whether a person has signed it: signed means the
 **Sign-off** table at the end of `VERIFICATION.md` has a Name and a Decision filled in (`VERIFICATION.json` keeps the
 script's blank template, so never judge the sign-off from it). A built module with no `VERIFICATION.md`, or one older than the module's code or tests, is **not proven yet** |
+| parity | `parity/PARITY.md` (written by `/modernize:parity`): the verdict (PARITY, NO PARITY, INCOMPLETE or NO EVIDENCE), the counts, any BREAKING contract, and whether its **Sign-off** row has a Name and a Decision. A report older than the new system's code is stale |
 
 ## 2 — Stale
 

@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.1.0 (2026-10-16)
+
+### Added
+
+- **`/modernize:parity`**: proves the new system answers like the legacy one, from the outside. It replays the same requests against both running systems and reports every difference in status, headers or body. It also checks the published contracts (OpenAPI JSON, WSDL, XSD) for breaking changes, such as a removed operation, a removed or retyped property, a new required parameter, or a changed target namespace. A person signs the report.
+  - **Cases** come from HAR recordings (credentials, static files and duplicates are dropped), from the contracts and business rules, or from the user. A case holds only a path, so requests go only to the two base URLs.
+  - **Match levels** (`exact`, `semantic`, `contract`) are set for the whole system and loosened per path or per case. Third-party-facing endpoints can then stay byte-exact while internal ones compare data only.
+  - **Scrub rules** (JSON paths, XML elements, regexes) and a **delta ledger** of approved differences. The report suggests likely noise, such as timestamps and GUIDs, but never scrubs it on its own.
+  - **Safety:** methods that change data are skipped unless both the manifest and the run allow them. Tokens are read from environment variables at run time and never stored. Proxies are bypassed and redirects are not followed.
+- Three tools on the `modernize-tools` server: `parity_init`, `parity_capture` and `parity_run` (standard library only).
+- The status canvas lists a system that only has parity output.
+
+### Verified
+
+- 14 new tests run the parity loop against two local HTTP servers: JSON casing, number format and key-order differences; SOAP answers that differ only in namespace prefix; OpenAPI and WSDL breaking changes; deltas, scrubs and per-path match levels; skipping unsafe methods; and secrets never reaching disk.
+
+### Not yet verified
+
+- `/modernize:parity` has not yet run in Copilot against a real migrated system.
+
 ## 1.0.0 (2026-10-16)
 
 Since 0.1.0, every dynamic workflow has run live, and upstream's live pane is back as a canvas in the Copilot desktop app.

@@ -30,7 +30,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PLUGIN_ROOT = os.path.dirname(HERE)
 SCRIPTS = os.path.join(PLUGIN_ROOT, "scripts")
 ASSETS = os.path.join(PLUGIN_ROOT, "assets")
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 OUTPUT_CAP = 60_000
 TIMEOUT_S = 900
 
@@ -294,6 +294,59 @@ def t_doctor(a):
     return result_text(json.dumps(info, indent=2), error=bool(failures) or not info["python_ok"])
 
 
+def _parity():
+    sys.path.insert(0, HERE)
+    try:
+        import parity  # noqa: E402  (same folder)
+    finally:
+        sys.path.pop(0)
+    return parity
+
+
+def _parity_call(fn):
+    p = _parity()
+    try:
+        return fn(p)
+    except p.ParityError as exc:
+        raise ToolError(str(exc)) from None
+
+
+def t_parity_init(a):
+    ws, system = workspace_of(a), system_of(a)
+    out = _parity_call(lambda p: p.init(ws, system, a.get("legacy_url"), a.get("candidate_url")))
+    return result_text(json.dumps(out, indent=2))
+
+
+def t_parity_capture(a):
+    ws, system = workspace_of(a), system_of(a)
+    hars = paths_in(ws, a.get("har"), "har")
+    if not hars:
+        raise ToolError("`har` needs at least one HAR file inside the workspace.")
+    for key in ("include", "exclude"):
+        if a.get(key) is not None and not isinstance(a.get(key), str):
+            raise ToolError(f"`{key}` must be a regular expression string.")
+    out = _parity_call(lambda p: p.import_har(ws, system, hars, a.get("include"), a.get("exclude")))
+    return result_text(json.dumps(out, indent=2))
+
+
+def t_parity_run(a):
+    ws, system = workspace_of(a), system_of(a)
+    only = a.get("cases")
+    if only is not None and (not isinstance(only, list) or not all(isinstance(x, str) for x in only)):
+        raise ToolError("`cases` must be a list of case ids.")
+    r = _parity_call(lambda p: p.run(ws, system, allow_unsafe=flag(a, "allow_unsafe"), only=only or None))
+    c = r["counts"]
+    lines = [f"verdict: {r['verdict']}",
+             f"cases: {c['MATCH']} match, {c['EXPECTED']} expected by the delta ledger, {c['DIFFERENT']} different, "
+             f"{c['SKIPPED']} skipped, {c['ERROR']} errors",
+             "contracts: " + (", ".join(f"{k['name']} {k['result']}" for k in r["contracts"]) or "none listed"),
+             f"suggested scrubs: {len(r['suggested_scrubs'])}; unused deltas: {', '.join(r['unused_deltas']) or 'none'}",
+             f"wrote analysis/{system}/parity/PARITY.md and PARITY.json"]
+    return result_text("\n".join(lines), error=False)
+
+
+PARITY_DIR = "analysis/<system>/parity/"
+
 TOOLS = {
     "build_report": (t_build_report, "Refresh the one-page offline report analysis/<system>/REPORT.html from every artifact on disk.",
                      {"workspace": WS, "system": SYS, "out": {"type": "string", "description": "Optional output path inside the workspace."}},
@@ -331,6 +384,22 @@ TOOLS = {
                    ["workspace", "system"]),
     "render_topology": (t_render_topology, "Build the interactive analysis/<system>/TOPOLOGY.html from topology.json using the plugin's viewer.",
                         {"workspace": WS, "system": SYS}, ["workspace", "system"]),
+    "parity_init": (t_parity_init, "Start a parity check: write " + PARITY_DIR + "parity.json (both base URLs), cases.json and deltas.json, keeping any that exist.",
+                    {"workspace": WS, "system": SYS,
+                     "legacy_url": {"type": "string", "description": "Base URL of the running legacy system, e.g. http://localhost:5001"},
+                     "candidate_url": {"type": "string", "description": "Base URL of the running new system, e.g. http://localhost:5002"}},
+                    ["workspace", "system", "legacy_url", "candidate_url"]),
+    "parity_capture": (t_parity_capture, "Import requests from HAR files into " + PARITY_DIR + "cases.json: one case per distinct request, credentials and static files dropped.",
+                       {"workspace": WS, "system": SYS,
+                        "har": {"type": "array", "items": {"type": "string"}, "description": "HAR files inside the workspace."},
+                        "include": {"type": "string", "description": "Optional regex: keep only URLs that match."},
+                        "exclude": {"type": "string", "description": "Optional regex: drop URLs that match."}},
+                       ["workspace", "system", "har"]),
+    "parity_run": (t_parity_run, "Replay every case against both systems, check the contracts, diff the answers with the scrub rules and delta ledger, and write PARITY.md and PARITY.json.",
+                   {"workspace": WS, "system": SYS,
+                    "allow_unsafe": {"type": "boolean", "description": "Also replay cases that change data. Only after a person has agreed, and only when parity.json allows it too."},
+                    "cases": {"type": "array", "items": {"type": "string"}, "description": "Optional: replay only these case ids."}},
+                   ["workspace", "system"]),
     "doctor": (t_doctor, "Report the plugin's runtime (Python version, OS, available build tools) and run the legacy/ guard self-test.",
                {"workspace": {**WS, "description": WS["description"] + " Optional."}}, []),
 }

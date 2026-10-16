@@ -90,7 +90,7 @@ export function legacyDirName(ws) {
 const SYSTEM_MARKERS = [
     "INTENT.md", "PREFLIGHT.md", "ASSESSMENT.md", "topology.json", "BUSINESS_RULES.md", "MODERNIZATION_BRIEF.md",
     "DELTA_CATALOG.md", "BASELINE.md", "PLAYBOOK.md", "VERIFICATION.json", "SECURITY_FINDINGS.md", "SOURCE",
-    "AI_NATIVE_SPEC.md", "REIMAGINED_ARCHITECTURE.md", "RULE_REVIEWS.json",
+    "AI_NATIVE_SPEC.md", "REIMAGINED_ARCHITECTURE.md", "RULE_REVIEWS.json", "parity",
 ];
 
 /**

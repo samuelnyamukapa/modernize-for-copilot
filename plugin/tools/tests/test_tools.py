@@ -53,7 +53,8 @@ class ServerTest(unittest.TestCase):
     def test_lists_every_tool(self):
         names = {t["name"] for t in self.client.call("tools/list")["result"]["tools"]}
         self.assertEqual(names, {"build_report", "make_shards", "render_rules", "compare", "trace_rules",
-                                 "baseline_diff", "uplift_checks", "proof_pack", "render_topology", "doctor"})
+                                 "baseline_diff", "uplift_checks", "proof_pack", "render_topology", "doctor",
+                                 "parity_init", "parity_capture", "parity_run"})
 
     def test_workspace_must_be_absolute_folder(self):
         text, err = self.client.tool("build_report", workspace="relative/path", system="billing")

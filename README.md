@@ -18,7 +18,7 @@ This is a community port of Anthropic's [`code-modernization`](https://github.co
 The plugin enforces a sequence, because modernization usually fails when steps are skipped:
 
 ```
-preflight → assess → map → extract-rules → brief → (reimagine | transform | uplift) → verify → harden
+preflight → assess → map → extract-rules → brief → (reimagine | transform | uplift) → verify → parity → harden
 ```
 
 | Skill | What it does |
@@ -34,6 +34,7 @@ preflight → assess → map → extract-rules → brief → (reimagine | transf
 | `/modernize:uplift` | Same-stack version move (e.g. .NET Framework 4.8 → .NET 8), with minimal diffs |
 | `/modernize:reimagine` | Greenfield rebuild from the extracted intent |
 | `/modernize:verify` | Independent proof: one verdict per module |
+| `/modernize:parity` | Black-box proof: the same requests sent to the legacy and new systems, every difference and contract break reported, for a person to sign off |
 | `/modernize:harden` | Security scan of the legacy system with a reviewable patch |
 | `/modernize:status` | Where you are and the next step |
 
