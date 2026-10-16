@@ -107,3 +107,18 @@ In the Copilot desktop app workflows are on already. In the CLI, start the test 
    - the `verify` verdicts and the `harden` counts.
 3. Ask the session to read a file under `legacy\eshop`. Its module's tile should light up, and the read should appear under Activity.
 4. Optional, and it writes files: in a workspace with rules waiting for review, give one verdict on the review deck. `analysis\<system>\RULE_REVIEWS.json` and `RULE_REVIEWS.md` should gain that verdict. Only a person uses the deck and the sign-off form; the agent never does.
+
+## Part F (later): the parity check (new in 1.1)
+
+Use a system whose legacy and new versions can both run locally and serve HTTP or SOAP: the eShop uplift, or the billing fixture.
+
+1. Start both systems, for example legacy on `http://localhost:5001` and the new one on `http://localhost:5002`. The skill never starts the legacy code.
+2. Optional: record some traffic against the legacy system as a HAR file. In the browser's developer tools, use Network › Export HAR. Save it inside the workspace.
+3. Run `/modernize:parity eshop --legacy http://localhost:5001 --candidate http://localhost:5002 --har recordings\eshop.har`.
+4. Expected:
+    - `analysis\eshop\parity\config.json`, `cases.json` and `deltas.json` are written;
+    - the skill lists the contracts it found and the cases, and asks before running any request that changes data;
+    - `PARITY.md` gives a verdict with every difference, including any that look like noise, such as timestamps;
+    - no file under `parity\` holds a token.
+5. Change one field name in the new system, run the check again, and confirm the difference is caught. Then undo the change.
+6. Run `/modernize:status eshop`. Parity should appear as a step, with the next command matching the verdict.

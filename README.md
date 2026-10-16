@@ -11,7 +11,7 @@ Point Copilot at a legacy codebase (COBOL, legacy Java/C++/.NET, monolith web ap
 
 This is a community port of Anthropic's [`code-modernization`](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-modernization) plugin for Claude Code. It is released under the same Apache 2.0 licence. It is not affiliated with or endorsed by Anthropic or GitHub. See [NOTICE](NOTICE).
 
-> **Status: 1.0.** On Windows, every skill except `reimagine` has run on a real legacy app (eShopLegacyMVC) in Copilot CLI and the Copilot desktop app. All six dynamic workflows and the live status canvas have run in the desktop app, mostly on a small test fixture. The evidence is in [CHANGELOG.md](CHANGELOG.md), [docs/WORKFLOW_LIVE_TESTS.md](docs/WORKFLOW_LIVE_TESTS.md) and [docs/SPIKE.md](docs/SPIKE.md). Read the "Not yet verified" list in the changelog before relying on it, and review every change it proposes: proof that new code behaves like the old is evidence for a person to judge, not a guarantee.
+> **Status: 1.1.** On Windows, every upstream skill except `reimagine` has run on a real legacy app (eShopLegacyMVC) in Copilot CLI and the Copilot desktop app. All six dynamic workflows and the live status canvas have run in the desktop app, mostly on a small test fixture. The evidence is in [CHANGELOG.md](CHANGELOG.md), [docs/WORKFLOW_LIVE_TESTS.md](docs/WORKFLOW_LIVE_TESTS.md) and [docs/SPIKE.md](docs/SPIKE.md). `/modernize:parity`, new in 1.1, has passed its automated tests but has not yet run against a real migrated system. Read the "Not yet verified" list in the changelog before relying on it, and review every change it proposes: proof that new code behaves like the old is evidence for a person to judge, not a guarantee.
 
 ## How it works
 
@@ -34,7 +34,7 @@ preflight → assess → map → extract-rules → brief → (reimagine | transf
 | `/modernize:uplift` | Same-stack version move (e.g. .NET Framework 4.8 → .NET 8), with minimal diffs |
 | `/modernize:reimagine` | Greenfield rebuild from the extracted intent |
 | `/modernize:verify` | Independent proof: one verdict per module |
-| `/modernize:parity` | Black-box proof: the same requests sent to the legacy and new systems, every difference and contract break reported, for a person to sign off |
+| `/modernize:parity` | **New in 1.1.** Black-box proof: the same requests sent to the legacy and new systems, every difference and contract break reported, for a person to sign off. See [docs/PARITY.md](docs/PARITY.md) |
 | `/modernize:harden` | Security scan of the legacy system with a reviewable patch |
 | `/modernize:status` | Where you are and the next step |
 
@@ -72,6 +72,15 @@ In the Copilot desktop app the plugin adds a **Modernize** canvas beside the ses
 - what needs a person, and the one next command, with a Copy button.
 
 A person can also answer the rules waiting for review there (written to `RULE_REVIEWS.json`, as `/modernize:review` does), and sign the brief's approval block and the verify sign-off. The canvas never runs a command and never writes outside `analysis/<system>/`. It is served from `127.0.0.1` only, and every request needs a random token. In the CLI nothing changes.
+
+## Additions beyond the upstream plugin
+
+Most of this plugin is a port of upstream. These parts are new:
+
+- **`/modernize:parity`** (new in 1.1). It sends the same requests to the running legacy and new systems and reports every difference. It checks the OpenAPI and WSDL contracts for breaking changes. It uses a delta ledger of approved differences, and a person signs the result. `status`, `verify` and the canvas suggest it at the right time. Guide: [docs/PARITY.md](docs/PARITY.md).
+- **The live status canvas** for the Copilot desktop app (new in 1.0). It replaces upstream's progress pane, and its readers are adapted from upstream's.
+- **The `legacy/` guard hook**, in place of Claude Code's permission rules. It blocks writes to the legacy code from the main agent, subagents and workflow agents.
+- **Two extra tools** on the `modernize-tools` server: `render_topology` builds the interactive map, and `doctor` reports the runtime and runs the guard self-test.
 
 ## Troubleshooting
 

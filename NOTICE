@@ -19,6 +19,10 @@ Modifications made in this repository include, among others:
   review ledger and sign-off writers are adapted from the upstream plugin's
   hooks/reader, hooks/map, hooks/review and hooks/sign.ts (Apache-2.0).
 
+Original to this repository (not derived from the upstream plugin):
+- The /modernize:parity skill and its tools (plugin/skills/parity/,
+  plugin/tools/parity.py), added in 1.1.
+
 This project is not affiliated with or endorsed by Anthropic or GitHub.
 "Claude" is a trademark of Anthropic, PBC. "GitHub" and "Copilot" are
 trademarks of GitHub, Inc.
