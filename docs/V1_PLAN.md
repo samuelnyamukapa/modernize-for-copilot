@@ -62,3 +62,14 @@ Upstream's live pane (estate map, review deck, sign dialog) was dropped for v0.1
 - Nothing under `legacy/` or `sources/` is changed. eShop and CardDemo are left as they are.
 - **Spending cap:** about 150 workflow agents in total, kept down by the fixture's size. Any single run that would need more than 60 is stopped and noted.
 - **Unclear outcomes:** if a step needs a decision that can't be undone, or the results are unclear, I record it here and in the morning summary rather than guessing.
+
+## Outcome (16 Oct 2026, morning)
+
+- **Workflows:** all five remaining workflows ran live on the first attempt; see [WORKFLOW_LIVE_TESTS.md](WORKFLOW_LIVE_TESTS.md). The fixture is .NET Framework 4.7.2 rather than 4.8. About 66 workflow agents were used in all, well under the cap.
+- **The canvas:** built and tested live in the app. Testing found two bugs:
+  - an open session kept the plugin folder busy on Windows. `4967c86` moves the server and extensions out of it, but the `py` launcher that starts the server may still hold it; not yet checked on Windows;
+  - a test folder was listed as a system. Fixed in `9aa04e5`, with a regression test.
+- **Docs and 1.0.0:** done; see [CHANGELOG.md](../CHANGELOG.md).
+- **Tags and releases:** still Sam's step for both versions. Actions › release › Run workflow:
+  - first with `ref` set to `d9f444e6eed4c67ad2dea806d728d86aa6fb89e0`, for v0.1.0;
+  - then with `ref` empty, for v1.0.0.

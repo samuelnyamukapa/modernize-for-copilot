@@ -1,5 +1,72 @@
 # Changelog
 
+## 1.0.0 (2026-10-16)
+
+Since 0.1.0, every dynamic workflow has run live, and upstream's live pane is back as a canvas in the Copilot desktop app.
+
+### Added
+
+- **The live status canvas, `modernize-status`** (Copilot desktop app). It is a page served on `127.0.0.1` and shown beside the session. It shows:
+  - per system: the track, the next command, each step with its age, and the module treemap from `topology.json`, which lights up as the session reads files;
+  - the brief and its approval, the `verify` verdicts and sign-off, and the `harden` counts.
+
+  It also has two places where a person writes:
+  - **a review deck**, which writes `RULE_REVIEWS.json` and `RULE_REVIEWS.md` in `/modernize:review`'s format;
+  - **a sign-off form** for the brief and `VERIFICATION.md`, which rewrites only the approval lines.
+
+  The agent can call three actions: `summary`, `show_system` and `refresh`. `/modernize:status` opens the canvas in the app; in the CLI it shows the table only.
+
+  The page:
+  - never runs commands, and never writes under `legacy/`;
+  - escapes everything it shows;
+  - needs a random token for every request;
+  - accepts only JSON POSTs of up to 64 KB from its own origin and host, under a strict Content Security Policy.
+- **`.github/workflows/release.yml`**, run by hand from the Actions tab. It tags the version in `plugin.json` and publishes a GitHub Release, with that version's section of this file as its notes.
+
+### Changed
+
+- **No `--experimental` in the app:** the skills now say the Copilot desktop app runs dynamic workflows as it is. The CLI still needs `--experimental`.
+- **Windows updates:** the MCP server and both extensions now move out of the plugin folder when they start. A process whose working directory is the plugin folder stops Windows from updating or uninstalling the plugin (os error 32). Updating *to* 1.0.0 needs every Copilot window closed first, because the 0.1.0 processes hold the folder.
+- **CI:**
+  - each Node test has a timeout;
+  - failures show up as annotations;
+  - the canvas declaration is checked against the real `@github/copilot-sdk`.
+
+### Verified
+
+- **All six dynamic workflows ran live** in the Copilot desktop app on Windows, each on its first attempt and in about 66 workflow agents in all. They ran on a small .NET Framework fixture, apart from `harden-scan`, which ran on eShop. Nothing under `legacy/` changed. Run ids and results are in [docs/WORKFLOW_LIVE_TESTS.md](docs/WORKFLOW_LIVE_TESTS.md).
+
+  | Workflow | Result |
+  |---|---|
+  | `portfolio-assess` | one row per system |
+  | `extract-rules-mine` | 6 rules confirmed, written by `render_rules` |
+  | `uplift-deltas` | 14 deltas, 1 dropped by a referee |
+  | `uplift-migrate` | two projects built on net8.0 |
+  | `reimagine-scaffold` | two services, each written only to its own folder |
+  | `harden-scan` | 16 findings judged, none unverified |
+- **The canvas, live in the app:**
+  - opened by the agent with `open_canvas`;
+  - showed eShop's full state;
+  - lit a module tile when the session read one of its files;
+  - wrote a rule verdict;
+  - updated by itself when a brief appeared, then wrote a test sign-off;
+  - answered the `summary` action.
+
+  One bug was found (a test folder shown as a system) and fixed.
+- **CardDemo (COBOL, 106 programs and copybooks):** `assess`, and `map --no-describe` (166 nodes, 189 edges).
+- **CI on Ubuntu and Windows:**
+  - guard self-test, structure lint and converter drift;
+  - 21 MCP and guard tests, 259 upstream script tests, 96 workflow tests and 55 canvas tests;
+  - the check against the real SDK.
+
+### Not yet verified
+
+- **The `reimagine` skill end to end.** Its `modernize-reimagine-scaffold` workflow ran live, but from a hand-written spec.
+- **CardDemo past `map`:** rules, brief and transform on COBOL.
+- **An in-place update from 0.1.0 to 1.0.0 in the app.** It needs every Copilot window closed first; see above.
+- **Whether open sessions still block updates on Windows.** The MCP server is started through the `py` launcher, which waits for the server and may keep the plugin folder busy even after the server leaves it. Until this is checked, close every Copilot window before updating on Windows.
+- **The canvas on macOS and Linux.** It was tested on Windows only.
+
 ## 0.1.0 (2026-10-16)
 
 First release of the GitHub Copilot port of Anthropic's [`code-modernization`](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-modernization) plugin (upstream v1.0.0, commit `8bd00f0`, Apache-2.0).

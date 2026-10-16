@@ -43,7 +43,7 @@ That makes about 66 workflow agents in all.
 
 Tested on 16 Oct 2026 in the Copilot desktop app on Windows.
 
-**How it was loaded.** The installed copy of `modernize` could not be updated that night: the old version's server and extension processes, started from the plugin folder by sessions still open on the machine, kept Windows from replacing it (os error 32). The canvas extension was therefore loaded from a local marketplace folder (`D:\githubProjects\modernize-canvas-dev`), which the app reads in place. It was removed again after the test. Since 4967c86, the server and extensions move out of the plugin folder when they start, so open sessions no longer block an update.
+**How it was loaded.** The installed copy of `modernize` could not be updated that night: the old version's server and extension processes, started from the plugin folder by sessions still open on the machine, kept Windows from replacing it (os error 32). The canvas extension was therefore loaded from a local marketplace folder (`D:\githubProjects\modernize-canvas-dev`), which the app reads in place. It was removed again after the test. Since 4967c86, the server and extensions move out of the plugin folder when they start. Whether that is enough on Windows is not yet checked: the `py` launcher that starts the server may still hold the folder.
 
 | Check | Result |
 |---|---|

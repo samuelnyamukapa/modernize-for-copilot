@@ -10,7 +10,7 @@
     {
       "name": "modernize",
       "source": "./plugin",
-      "version": "0.1.0",
+      "version": "1.0.0",
       "description": "Assess, map, mine business rules, plan, then upgrade, rewrite or rebuild legacy code with proof of behavioural equivalence.",
       "license": "Apache-2.0",
       "category": "development",

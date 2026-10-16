@@ -4,7 +4,7 @@
 - No Claude Code-only tokens in skills, agents, hooks, extensions or tools.
 - Agent and skill frontmatter is present and uses keys Copilot understands.
 - Skill folder name matches its `name`.
-- plugin.json and marketplace.json parse and agree on name and version.
+- plugin.json and marketplace.json parse and agree on name and version, and the MCP server reports that version.
 """
 from __future__ import annotations
 
@@ -117,6 +117,11 @@ def main() -> int:
         err(os.path.join(ROOT, ".github/plugin/marketplace.json"), f"no entry for {manifest.get('name')!r}")
     elif entry.get("version") != manifest.get("version"):
         err(os.path.join(ROOT, ".github/plugin/marketplace.json"), "version differs from plugin.json")
+    server = os.path.join(PLUGIN, "tools", "server.py")
+    with open(server, encoding="utf-8") as fh:
+        m = re.search(r'^VERSION = "([^"]+)"', fh.read(), re.M)
+    if not m or m.group(1) != manifest.get("version"):
+        err(server, "VERSION differs from plugin.json")
 
     for e in errors:
         print(f"error: {e}")

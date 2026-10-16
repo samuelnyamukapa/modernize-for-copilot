@@ -385,3 +385,9 @@ There is one milestone per phase. Labels: `phase-0` … `phase-6`, `needs-sam` (
 - **Spike check 8, desktop app parity, passed.** The app shares the CLI's plugin setup.
 - **CardDemo:** `start`, `preflight`, `assess` and `map` passed in the app.
 - **Next:** the live status canvas (#16), then 1.0.0.
+
+## Update, 16 Oct 2026 (1.0.0)
+
+- **The live status canvas (#16) is done.** It ran live in the Copilot desktop app; see [WORKFLOW_LIVE_TESTS.md](WORKFLOW_LIVE_TESTS.md).
+- **Version 1.0.0 is on `main`.** [CHANGELOG.md](../CHANGELOG.md) lists what is verified, and what is not yet.
+- **Tags and releases:** the tags and Releases for 0.1.0 and 1.0.0 are made from Actions › release; see [V1_PLAN.md](V1_PLAN.md).

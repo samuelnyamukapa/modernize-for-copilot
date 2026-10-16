@@ -2,9 +2,15 @@ name: release
 
 # Run by hand (Actions › release › Run workflow) to tag the version in plugin/plugin.json
 # and publish a GitHub Release whose notes are that version's section of CHANGELOG.md.
+# To release an earlier commit, give its full SHA as `ref`: the version, notes and tag all
+# come from that commit, and the release is not marked Latest.
 on:
   workflow_dispatch:
     inputs:
+      ref:
+        description: "Full commit SHA to release (empty: the branch you run this on)"
+        type: string
+        default: ""
       prerelease:
         description: "Mark the release as a pre-release"
         type: boolean
@@ -18,6 +24,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.sha }}
       - name: Read the version and its changelog section
         id: meta
         run: |
@@ -44,5 +52,6 @@ jobs:
           fi
           flags=""
           if [ "${{ inputs.prerelease }}" = "true" ]; then flags="--prerelease"; fi
-          gh release create "${{ steps.meta.outputs.tag }}" --target "$GITHUB_SHA" \
+          if [ -n "${{ inputs.ref }}" ]; then flags="$flags --latest=false"; fi
+          gh release create "${{ steps.meta.outputs.tag }}" --target "$(git rev-parse HEAD)" \
             --title "${{ steps.meta.outputs.tag }}" --notes-file notes.md $flags

@@ -26,9 +26,9 @@ copilot plugin install modernize@modernize-for-copilot
 copilot plugin list
 ```
 
-You should see `modernize@modernize-for-copilot (v0.1.0)`. The first line fails harmlessly if the plugin isn't installed.
+You should see `modernize@modernize-for-copilot (v1.0.0)`. The first line fails harmlessly if the plugin isn't installed.
 
-**A3. After each fix is pushed,** close the Copilot sessions and update:
+**A3. After each fix is pushed,** close every Copilot window (CLI and app), then update. A running session can keep the plugin folder busy on Windows:
 
 ```powershell
 copilot plugin marketplace update modernize-for-copilot
@@ -95,3 +95,15 @@ In the Copilot desktop app workflows are on already. In the CLI, start the test 
 1. `/workflows` should list six `modernize-…` workflows. If it lists fewer, screenshot it: a definition was rejected.
 2. Re-run `/modernize:extract-rules eshop`. It should say it is using the `modernize-extract-rules-mine` workflow (Method A) and show progress in `/workflows`.
 3. `/modernize:harden eshop` runs `modernize-harden-scan`; `/modernize:uplift` runs `modernize-uplift-deltas` and later `modernize-uplift-migrate`.
+
+## Part E (later): the live status canvas (Copilot desktop app)
+
+1. Open the sandbox folder as a project in the app, and run `/modernize:status eshop`. After the table, the agent should open the **modernize status** canvas beside the session. You can also ask for it: "Open the modernize-status canvas for system eshop".
+2. The page should show:
+   - the uplift track and its next command;
+   - each step with its age;
+   - the module treemap;
+   - the plan with its approval;
+   - the `verify` verdicts and the `harden` counts.
+3. Ask the session to read a file under `legacy\eshop`. Its module's tile should light up, and the read should appear under Activity.
+4. Optional, and it writes files: in a workspace with rules waiting for review, give one verdict on the review deck. `analysis\<system>\RULE_REVIEWS.json` and `RULE_REVIEWS.md` should gain that verdict. Only a person uses the deck and the sign-off form; the agent never does.
