@@ -1,0 +1,48 @@
+name: release
+
+# Run by hand (Actions › release › Run workflow) to tag the version in plugin/plugin.json
+# and publish a GitHub Release whose notes are that version's section of CHANGELOG.md.
+on:
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: "Mark the release as a pre-release"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Read the version and its changelog section
+        id: meta
+        run: |
+          version=$(python3 -c "import json; print(json.load(open('plugin/plugin.json'))['version'])")
+          case "$version" in *-dev*|"") echo "::error::plugin.json version '$version' is not a release version"; exit 1;; esac
+          python3 - "$version" > notes.md <<'EOF'
+          import re, sys
+          version = sys.argv[1]
+          text = open("CHANGELOG.md", encoding="utf-8").read()
+          m = re.search(r"^## " + re.escape(version) + r"\b.*?$(.*?)(?=^## |\Z)", text, re.M | re.S)
+          if not m:
+              sys.exit(f"CHANGELOG.md has no '## {version}' section")
+          print(m.group(1).strip())
+          print("\n## Install\n\n```sh\ncopilot plugin marketplace add samuelnyamukapa/modernize-for-copilot\n"
+                "copilot plugin install modernize@modernize-for-copilot\n```")
+          EOF
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+      - name: Tag and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/${{ steps.meta.outputs.tag }}" >/dev/null; then
+            echo "::error::${{ steps.meta.outputs.tag }} already exists"; exit 1
+          fi
+          flags=""
+          if [ "${{ inputs.prerelease }}" = "true" ]; then flags="--prerelease"; fi
+          gh release create "${{ steps.meta.outputs.tag }}" --target "$GITHUB_SHA" \
+            --title "${{ steps.meta.outputs.tag }}" --notes-file notes.md $flags
