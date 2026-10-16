@@ -85,14 +85,24 @@ export function legacyDirName(ws) {
     return ok ? name : "legacy";
 }
 
+// A folder under analysis/ is a system only when a skill has written one of these into it, or the
+// legacy tree has the same name: scratch folders such as analysis/notes/ are not systems.
+const SYSTEM_MARKERS = [
+    "INTENT.md", "PREFLIGHT.md", "ASSESSMENT.md", "topology.json", "BUSINESS_RULES.md", "MODERNIZATION_BRIEF.md",
+    "DELTA_CATALOG.md", "BASELINE.md", "PLAYBOOK.md", "VERIFICATION.json", "SECURITY_FINDINGS.md", "SOURCE",
+    "AI_NATIVE_SPEC.md", "REIMAGINED_ARCHITECTURE.md", "RULE_REVIEWS.json",
+];
+
 /**
- * The systems in the workspace: folders under analysis/ (real folders only: a link there is not read) and entries
- * under the legacy tree (a folder, or a link to one), whose names the skills accept.
+ * The systems in the workspace: entries under the legacy tree (a folder, or a link to one), and folders under
+ * analysis/ (real folders only: a link there is not read) that hold a skill's output, whose names the skills accept.
  */
 export function listSystems(ws, legacyDir = legacyDirName(ws)) {
     const names = new Set();
     for (const e of listDir(path.join(ws, "analysis"))) {
-        if (e.isDirectory() && isSystemName(e.name)) names.add(e.name);
+        if (!e.isDirectory() || !isSystemName(e.name)) continue;
+        const dir = path.join(ws, "analysis", e.name);
+        if (SYSTEM_MARKERS.some((f) => fs.existsSync(path.join(dir, f)))) names.add(e.name);
     }
     const legacy = path.join(ws, legacyDir);
     for (const e of listDir(legacy)) {

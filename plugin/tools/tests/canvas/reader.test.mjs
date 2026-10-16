@@ -321,3 +321,18 @@ test("summary for the agent: one plain line per field, the next command, verdict
         rmrf(ws);
     }
 });
+
+test("an analysis folder with no skill output is not a system (found in the live test: analysis/live-tests/)", () => {
+    const ws = makeWorkspace({
+        "analysis/billing/BUSINESS_RULES.md": "x",
+        "analysis/live-tests/run.json": "{}",
+        "analysis/notes/todo.md": "x",
+        "analysis/inventory/SOURCE": "D:\\src\\inventory\n",
+        "legacy/payroll/a.cbl": "x",
+    });
+    try {
+        assert.deepEqual(listSystems(ws), ["billing", "inventory", "payroll"]);
+    } finally {
+        rmrf(ws);
+    }
+});
