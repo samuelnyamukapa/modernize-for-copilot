@@ -207,6 +207,9 @@ class RunTests(unittest.TestCase):
         self.assertEqual(parity.load_manifest(self.ws, "billing")["legacy"]["base_url"], legacy)
         self.assertIn("**Verdict: NO PARITY**", report)
         self.assertIn("## Sign-off", report)
+        for row in ("| Name | ________________ |", "| Role | ________________ |", "| Date | __________ |",
+                    "| Decision | accept / accept with conditions / reject |"):
+            self.assertIn(row, report)   # the layout the status canvas reads, as in VERIFICATION.md
 
     def test_deltas_scrubs_and_levels_reach_parity(self):
         with Servers() as (legacy, candidate):

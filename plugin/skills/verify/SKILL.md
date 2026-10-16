@@ -159,4 +159,7 @@ test or difference: `/modernize:transform <system> <module>`, or for an uplift `
 (also for a baseline typed by hand, which is measured again in its Step 4, and for a silent delta no test names, which gets a
 characterization test there). Removed or changed test files are a person's review, never yours to undo.
 **PROVEN:** it is evidence, not approval. A named person signs `analysis/<system>/VERIFICATION.md`; then the brief's next module, or
-`/modernize:harden <system>`.
+`/modernize:harden <system>`. Once every module the brief names is built and PROVEN, and the system serves HTTP or SOAP
+endpoints, also name `/modernize:parity <system>`: this skill proves each module through its tests, while parity sends the
+same requests to the running legacy and new systems and compares what comes back. If `analysis/<system>/parity/PARITY.md`
+already exists, it is now older than the code this run checked: say so, and name `/modernize:parity <system>` to run it again.

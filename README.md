@@ -18,7 +18,7 @@ This is a community port of Anthropic's [`code-modernization`](https://github.co
 The plugin enforces a sequence, because modernization usually fails when steps are skipped:
 
 ```
-preflight → assess → map → extract-rules → brief → (reimagine | transform | uplift) → verify → parity → harden
+preflight → assess → map → extract-rules → brief → (reimagine | transform | uplift) → verify → harden → parity
 ```
 
 | Skill | What it does |

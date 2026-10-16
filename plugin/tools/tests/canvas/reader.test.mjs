@@ -336,3 +336,26 @@ test("an analysis folder with no skill output is not a system (found in the live
         rmrf(ws);
     }
 });
+
+test("the parity report: verdict, counts and sign-off from /modernize:parity's files", () => {
+    const md = (name) => ["# Parity report: billing", "", "**Verdict: PARITY**", "", "## Sign-off", "",
+        "A person fills this in; the agent never does.", "", "| | |", "|---|---|", `| Name | ${name || "________________"} |`,
+        "| Role | ________________ |", "| Date | __________ |", `| Decision | ${name ? "accept" : "accept / accept with conditions / reject"} |`, ""].join("\n");
+    const json = JSON.stringify({ verdict: "NO PARITY", counts: { MATCH: 4, EXPECTED: 0, DIFFERENT: 2, SKIPPED: 0, ERROR: 0 },
+                                  contracts: [{ name: "openapi", result: "BREAKING" }, { name: "wsdl", result: "IDENTICAL" }] });
+    const ws = makeWorkspace({ [A("INTENT.md")]: "# Intent\n", [A("parity/PARITY.json")]: json, [A("parity/PARITY.md")]: md("") });
+    try {
+        const s = readSystem(ws, "billing");
+        assert.deepEqual(s.parity, { verdict: "NO PARITY", different: 2, breaking: 1, signed: false });
+        assert.ok(s.attention.some((a) => a.kind === "parity"));
+        fs.writeFileSync(path.join(ws, A("parity/PARITY.json")), JSON.stringify({ verdict: "PARITY", counts: { DIFFERENT: 0 }, contracts: [] }));
+        fs.writeFileSync(path.join(ws, A("parity/PARITY.md")), md("Ada Lovelace"));
+        assert.deepEqual(readSystem(ws, "billing").parity, { verdict: "PARITY", different: 0, breaking: 0, signed: true });
+        assert.deepEqual(summaryOf(readWorkspace(ws)).systems[0].parity, { verdict: "PARITY", signed: true });
+        fs.writeFileSync(path.join(ws, A("parity/PARITY.json")), "{not json");
+        assert.equal(readSystem(ws, "billing").parity.verdict, null);
+        assert.ok(listSystems(ws).includes("billing"));
+    } finally {
+        rmrf(ws);
+    }
+});

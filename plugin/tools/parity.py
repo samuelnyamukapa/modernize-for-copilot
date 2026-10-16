@@ -804,6 +804,7 @@ def render_report(r: dict) -> str:
         lines += ["", "## Deltas that matched nothing", "", "These approved differences no longer occur. Check whether they are still needed: "
                   + ", ".join(r["unused_deltas"])]
     lines += ["", "## Sign-off", "",
-              "Filled in by a person, never by the agent. Re-running the check clears it, because the evidence has changed.", "",
-              "| Name | Role | Decision | Date |", "| --- | --- | --- | --- |", "|  |  |  |  |", ""]
+              "A person fills this in; the agent never does. Re-running the check clears it, because the evidence has changed.", "",
+              "| | |", "|---|---|", "| Name | ________________ |", "| Role | ________________ |", "| Date | __________ |",
+              "| Decision | accept / accept with conditions / reject |", ""]
     return "\n".join(lines)

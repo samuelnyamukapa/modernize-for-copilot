@@ -480,6 +480,30 @@ export function parseSignoff(text) {
     };
 }
 
+// ---------------------------------------------------------------- parity/PARITY.json and PARITY.md
+
+export const PARITY_VERDICTS = ["PARITY", "NO PARITY", "INCOMPLETE", "NO EVIDENCE"];
+
+/** /modernize:parity's report: {verdict, atMs, different, breaking, signoff}, or null when there is none. */
+export function parseParity(jsonText, mdText, atMs) {
+    if (jsonText === null && mdText === null) return null;
+    let verdict = null;
+    let different = 0;
+    let breaking = 0;
+    try {
+        const j = JSON.parse(jsonText ?? "");
+        if (j && typeof j === "object" && !Array.isArray(j)) {
+            verdict = PARITY_VERDICTS.includes(j.verdict) ? j.verdict : null;
+            different = Number.isInteger(j.counts?.DIFFERENT) ? j.counts.DIFFERENT : 0;
+            breaking = Array.isArray(j.contracts) ? j.contracts.filter((c) => c && c.result === "BREAKING").length : 0;
+        }
+    } catch {
+        // unreadable: verdict stays null and the next step says to run the check again
+    }
+    const signoff = mdText !== null ? parseSignoff(mdText) : { hasTable: false, signed: false };
+    return { verdict, atMs: atMs ?? null, different, breaking, signoff };
+}
+
 // ---------------------------------------------------------------- SECURITY_FINDINGS.md
 
 const SEVERITIES = ["Critical", "High", "Medium", "Low"];

@@ -15,7 +15,7 @@ If that line shows the literal text `$ARGUMENTS` or is empty, the skill was star
 
 The **workspace** is the absolute path of the current working directory: the project folder that holds `legacy/`, `analysis/` and `modernized/`.
 
-**Tools.** This skill calls `parity_init`, `parity_capture` and `parity_run` on the `modernize-tools` MCP server (`modernize-tools-win` on Windows; only one of the two serves tools on a machine). Always pass `workspace` (the absolute path above) and give every other path relative to it. They are essential: if the server isn't available, stop. Tell the user to run `/mcp` to check that `modernize-tools` (or `modernize-tools-win`) is connected, and to see `/modernize:preflight`. Never compute a verdict, a difference or a contract check by hand, and never edit `PARITY.md` or `PARITY.json` except the sign-off row in step 7. A tool that answers with an error about an argument is not unavailable: correct the call.
+**Tools.** This skill calls `parity_init`, `parity_capture` and `parity_run` on the `modernize-tools` MCP server (`modernize-tools-win` on Windows; only one of the two serves tools on a machine). Always pass `workspace` (the absolute path above) and give every other path relative to it. They are essential: if the server isn't available, stop. Tell the user to run `/mcp` to check that `modernize-tools` (or `modernize-tools-win`) is connected, and to see `/modernize:preflight`. Never compute a verdict, a difference or a contract check by hand, and never edit `PARITY.md` or `PARITY.json` except the sign-off table in step 7. A tool that answers with an error about an argument is not unavailable: correct the call.
 
 `verify` proves each module from the inside, with tests. This skill proves the system from the outside: the same request goes to both systems, and every difference in status, headers, body or contract is listed. It works for any migration, whatever was used to build the new system.
 
@@ -96,7 +96,7 @@ Re-run `parity_run` after every change to `config.json` or `deltas.json`. Report
 
 ## 7 — Sign-off
 
-Only when the verdict is PARITY, ask with `ask_user`: "Do you sign off parity for <system>? Give your name and role." With a yes, fill in the sign-off row of `PARITY.md` with exactly the name and role given, the decision "Signed off", and today's date from the system clock. Change nothing else in the file. Never fill it in for anyone, and never in headless mode.
+Only when the verdict is PARITY, ask with `ask_user`: "Do you sign off parity for <system>? Give your name, your role, and your decision: accept, accept with conditions, or reject." Fill in the **Sign-off** table at the end of `PARITY.md` (its Name, Role, Date and Decision rows) with exactly what the person gave, and today's date from the system clock. Change nothing else in the file. Never fill it in for anyone, and never in headless mode. In the Copilot desktop app, `/modernize:status` shows the result.
 
 ## 8 — Wrap-up
 

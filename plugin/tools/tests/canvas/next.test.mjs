@@ -101,7 +101,42 @@ test("rewrite: after the approved phases, harden; then revise the brief for the 
     const phase1 = signedBrief([ph(1, ["FEES", "RATES"]), ph(2, ["STMT"])], "Phase 1 only");
     assert.equal(next({ ...done, brief: phase1 }).command, "/modernize:harden billing");
     assert.equal(next({ ...done, brief: phase1, files: { "SECURITY_FINDINGS.md": T + 50 } }).command, "/modernize:brief billing");
-    assert.equal(next({ ...done, brief: signedBrief([ph(1, ["FEES", "RATES"])]), files: { "SECURITY_FINDINGS.md": T + 50 } }).command, "/modernize:status billing");
+    const all = { ...done, brief: signedBrief([ph(1, ["FEES", "RATES"])]), files: { "SECURITY_FINDINGS.md": T + 50 } };
+    const finalStep = next(all);
+    assert.equal(finalStep.command, "/modernize:parity billing");
+    assert.match(finalStep.reason, /HTTP or SOAP endpoints/);
+    const signedParity = { verdict: "PARITY", atMs: T + 200, different: 0, breaking: 0, signoff: { hasTable: true, signed: true } };
+    assert.equal(next({ ...all, parity: signedParity }).command, "/modernize:status billing");
+});
+
+test("parity: a stale, failing or unsigned report comes right after verify; its step and attention show up only once it exists", () => {
+    const done = { modules: [mod("FEES"), mod("RATES")], verification: verif([["FEES", "PROVEN"], ["RATES", "PROVEN"]]), signoff: { hasTable: true, signed: true },
+                   brief: signedBrief([ph(1, ["FEES", "RATES"])], "Phase 1 only") };
+    const report = (over) => ({ verdict: "PARITY", atMs: T + 200, different: 0, breaking: 0, signoff: { hasTable: true, signed: true }, ...over });
+    assert.ok(!progressOf(facts(done)).stages.some((st) => st.key === "parity"));
+
+    const failing = progressOf(facts({ ...done, parity: report({ verdict: "NO PARITY", different: 3, breaking: 1, signoff: { hasTable: true, signed: false } }) }));
+    assert.equal(failing.next.command, "/modernize:parity billing");
+    assert.match(failing.next.reason, /parity is NO PARITY/);
+    assert.ok(failing.attention.some((a) => a.kind === "parity" && /3 unexplained differences, 1 breaking contract change$/.test(a.text)));
+    const stage = failing.stages.find((st) => st.key === "parity");
+    assert.equal(stage.done, false);
+    assert.equal(stage.detail, "NO PARITY");
+    assert.deepEqual(failing.stages.map((st) => st.key).slice(-3), ["verify", "parity", "harden"]);
+
+    const unsigned = progressOf(facts({ ...done, parity: report({ signoff: { hasTable: true, signed: false } }) }));
+    assert.match(unsigned.next.reason, /no person has signed it/);
+    assert.ok(unsigned.attention.some((a) => a.text === "parity/PARITY.md is not signed by a person"));
+
+    const stale = progressOf(facts({ ...done, modules: [mod("FEES", true, T + 10_000_000), mod("RATES")], verification: verif([["FEES", "PROVEN"], ["RATES", "PROVEN"]], T + 20_000_000), parity: report() }));
+    assert.match(stale.next.reason, /changed since parity was checked/);
+    assert.ok(stale.stale.some((x) => x.artifact === "parity/PARITY.md"));
+    assert.equal(stale.stages.find((st) => st.key === "parity").done, false);
+
+    const good = progressOf(facts({ ...done, parity: report() }));
+    assert.equal(good.next.command, "/modernize:harden billing");
+    assert.equal(good.stages.find((st) => st.key === "parity").done, true);
+    assert.equal(progressOf(facts({ ...done, parity: report({ verdict: null }) })).next.reason, "parity/PARITY.json cannot be read: run the check again");
 });
 
 test("uplift: baseline, pilot, the rest, then verify the working copy as a whole", () => {

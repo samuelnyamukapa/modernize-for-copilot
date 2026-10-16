@@ -7,7 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import {
-    isSystemName, parseIntent, parseRules, parseReviews, parseBrief, parseVerification, parseSignoff,
+    isSystemName, parseIntent, parseRules, parseReviews, parseBrief, parseVerification, parseSignoff, parseParity,
     parseSecurity, parseTopology, countDeltas, plain, line,
 } from "./parsers.mjs";
 import { progressOf } from "./progress.mjs";
@@ -319,6 +319,9 @@ export function readSystem(ws, system, { cache, legacyDir = legacyDirName(ws) } 
     const verification = parseVerification(text("VERIFICATION.json"));
     const verificationMd = text("VERIFICATION.md");
     const signoff = verificationMd !== null ? parseSignoff(verificationMd) : null;
+    const parity = hasAnalysis
+        ? parseParity(readText(path.join(adir, "parity", "PARITY.json")), readText(path.join(adir, "parity", "PARITY.md")), fileMtime(path.join(adir, "parity", "PARITY.json")))
+        : null;
     const securityText = text("SECURITY_FINDINGS.md");
     const security = securityText !== null ? parseSecurity(securityText) : null;
     const topoText = text("topology.json", MAX_TOPOLOGY);
@@ -348,6 +351,7 @@ export function readSystem(ws, system, { cache, legacyDir = legacyDirName(ws) } 
         brief,
         verification,
         signoff,
+        parity,
         security,
         modules: built.modules,
         upliftNotesMs: built.notesMs,
@@ -385,6 +389,7 @@ export function readSystem(ws, system, { cache, legacyDir = legacyDirName(ws) } 
         verification: verification || signoff
             ? { overall: verification?.overall ?? null, signoff: signoff ?? { hasTable: false, signed: false } }
             : null,
+        parity: parity ? { verdict: parity.verdict, different: parity.different, breaking: parity.breaking, signed: parity.signoff.signed } : null,
         security,
         map: mapOf(ws, legacyDir, system, topology, track, built.modules, p.proofs, cache),
     };
@@ -475,6 +480,7 @@ export function summaryOf(model) {
                 next: s.next.command ? { command: plain(s.next.command, 160), reason: plain(s.next.reason, 200) } : { byHand: plain(s.next.text, 80), reason: plain(s.next.reason, 200) },
                 briefApproved: s.brief ? s.brief.approval.signed : null,
                 verificationSigned: s.verification ? s.verification.signoff.signed : null,
+                parity: s.parity ? { verdict: s.parity.verdict, signed: s.parity.signed } : null,
                 verdicts,
                 rulesWaitingForReview: s.rules?.flaggedOpen ?? 0,
                 p0RulesWaitingForReview: s.rules?.p0Open ?? 0,

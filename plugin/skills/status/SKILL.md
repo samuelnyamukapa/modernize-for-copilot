@@ -48,7 +48,7 @@ Flag any artifact older than one it derives from: the brief older than `ASSESSME
 `BUSINESS_RULES.md` (no longer reflects discovery: rerun `brief`); an uplift's brief older than
 `DELTA_CATALOG.md`, or with no catalog (phase order was decided without the version deltas: rerun `brief`);
 `TOPOLOGY.html` older than `topology.json` (rerun the render step of `map`); a `TRANSFORMATION_NOTES.md` older
-than `BUSINESS_RULES.md` (the module may not implement the latest rules: list which).
+than `BUSINESS_RULES.md` (the module may not implement the latest rules: list which); `parity/PARITY.md` older than the newest file of the new system's code (compared before the last change: rerun `/modernize:parity`).
 
 ## 3 — Secrets hygiene
 
@@ -74,3 +74,8 @@ End with three lines:
   The order is preflight, assess, map, extract-rules, review (when rules are flagged for a person), brief (needs approval), then the brief's Phase 1 command
   (`transform`, `uplift` or `reimagine`), then `verify` for what was built, then `harden`. Never call a
   built module done until `verify` says PROVEN and a person has signed it: put `verify` ahead of building the next module.
+  A parity report that exists but is stale, not PARITY, or unsigned comes right after `verify`: `/modernize:parity <system>`.
+  When everything the plan names is built, proven and signed, and the system serves HTTP or SOAP endpoints (controllers,
+  `.svc` services, an API or a website, as `ASSESSMENT.md` or `topology.json` shows), the next step is
+  `/modernize:parity <system>`: it compares the running new system with the legacy one from the outside. Skip it for
+  systems with no such endpoints (batch jobs, say), and say why.

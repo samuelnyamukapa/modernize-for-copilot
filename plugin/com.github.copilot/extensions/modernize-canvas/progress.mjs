@@ -73,6 +73,12 @@ export function staleOf(facts) {
             }
         }
     }
+    if (facts.parity?.atMs != null) {
+        const newest = Math.max(0, ...facts.modules.map((m) => m.newestMs ?? 0));
+        if (newest > facts.parity.atMs + SLACK_MS) {
+            out.push({ artifact: "parity/PARITY.md", because: "older than the new code", fix: cmd("parity", facts.system), why: "the new system changed since it was compared with the legacy one" });
+        }
+    }
     return out;
 }
 
@@ -95,7 +101,8 @@ const verifyStep = (facts, module, proof) => {
 /**
  * The single most useful next step, as {command, reason} or, where only a person can act, {action, text, reason}.
  * Order (status/SKILL.md): preflight, assess, map, extract-rules, review, brief (approval), the brief's build command,
- * verify ahead of building the next module, then harden.
+ * verify ahead of building the next module, a parity report that is stale, failing or unsigned, then harden;
+ * with everything built and proven, parity (for systems that serve HTTP or SOAP endpoints).
  */
 export function nextOf(facts, ctx) {
     const s = facts.system;
@@ -178,9 +185,27 @@ export function nextOf(facts, ctx) {
             return { command: cmd("transform", s, "<module>"), reason: "the approved phases name no module to build" };
         }
     }
+    const par = facts.parity;
+    if (par) {
+        if (ctx.stale.some((x) => x.artifact === "parity/PARITY.md")) {
+            return { command: cmd("parity", s), reason: "the new code changed since parity was checked: compare it with the legacy system again" };
+        }
+        if (par.verdict !== "PARITY") {
+            return {
+                command: cmd("parity", s),
+                reason: par.verdict
+                    ? `parity is ${par.verdict}: fix the new system or have a person approve each difference in parity/PARITY.md, then run it again`
+                    : "parity/PARITY.json cannot be read: run the check again",
+            };
+        }
+        if (!par.signoff.signed) return { command: cmd("parity", s), reason: "parity holds, but no person has signed it: the check asks a named person to sign" };
+    }
     if (!has("SECURITY_FINDINGS.md")) return { command: cmd("harden", s), reason: "scans the legacy system for security problems, with a reviewable patch" };
     const more = brief.phases.length > approvedPhases(brief).length;
     if (more) return { command: cmd("brief", s), reason: "the approved phases are built and proven: revise the brief from what they taught, then approve the next phases" };
+    if (!par && facts.modules.some((m) => m.built)) {
+        return { command: cmd("parity", s), reason: "everything the plan names is built and proven: if the system serves HTTP or SOAP endpoints, compare it with the legacy system from the outside" };
+    }
     return { command: cmd("status", s), reason: "everything the plan names is built, proven and signed; status says what is stale" };
 }
 
@@ -221,6 +246,19 @@ export function stagesOf(facts, ctx) {
         ...(proofs.length ? { detail: `${proofs.filter((p) => p.state === "proven").length} of ${proofs.length} proven${facts.signoff?.signed ? ", signed" : ""}` } : {}),
     };
     const harden = st("harden", "harden", "SECURITY_FINDINGS.md");
+    const par = facts.parity;
+    const parityStale = staleFiles.has("parity/PARITY.md");
+    const parity = par
+        ? [{
+            key: "parity",
+            label: "parity",
+            done: par.verdict === "PARITY" && par.signoff.signed && !parityStale,
+            file: "parity/PARITY.md",
+            mtimeMs: par.atMs,
+            detail: `${par.verdict ?? "unreadable"}${par.signoff.signed ? ", signed" : ""}`,
+            stale: parityStale,
+        }]
+        : [];
     const built = facts.modules.filter((m) => m.built).length;
     let build;
     if (facts.track === "uplift") {
@@ -243,7 +281,7 @@ export function stagesOf(facts, ctx) {
     }
     // "Understand it first" stops after the brief (start/SKILL.md): no build steps are shown for it.
     if (facts.intent?.goal === "understand" && facts.modules.length === 0) return [...common, harden];
-    return [...common, ...build, verify, harden];
+    return [...common, ...build, verify, ...parity, harden];
 }
 
 /** What needs a person, as [{kind, text}], most urgent first. */
@@ -271,6 +309,14 @@ export function attentionOf(facts, ctx) {
         else if (p.state === "none") add("proof", `${m.name}: built, not verified yet`);
     }
     if (facts.signoff?.hasTable && !facts.signoff.signed) add("signoff", "VERIFICATION.md is not signed by a person");
+    const par = facts.parity;
+    if (par?.verdict && par.verdict !== "PARITY") {
+        const parts = [`${par.different} unexplained difference${par.different === 1 ? "" : "s"}`];
+        if (par.breaking) parts.push(`${par.breaking} breaking contract change${par.breaking === 1 ? "" : "s"}`);
+        add("parity", `Parity is ${par.verdict}: ${parts.join(", ")}`);
+    } else if (par?.verdict === "PARITY" && par.signoff.hasTable && !par.signoff.signed) {
+        add("signoff", "parity/PARITY.md is not signed by a person");
+    }
     for (const s of ctx.stale) add("stale", `${s.artifact} is stale (${s.because}): ${s.fix}`);
     const sec = facts.security;
     if (sec && (sec.Critical > 0 || sec.High > 0)) {

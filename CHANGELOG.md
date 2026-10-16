@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.1.1 (2026-10-16)
+
+### Changed
+
+- **`/modernize:parity` is now part of the flow; you no longer have to remember it.**
+  - `/modernize:status` and the status canvas suggest it once everything the plan names is built and proven, for systems that serve HTTP or SOAP endpoints. They suggest it again when its report goes stale (the new code changed after the check), is not PARITY, or is unsigned. That comes right after `verify`.
+  - `/modernize:verify` names it as the next check, and says when an earlier parity report is now out of date.
+  - The canvas shows a parity step once a report exists, and lists unexplained differences, breaking contract changes and a missing sign-off under what needs a person.
+  - The canvas's summary action reports the parity verdict.
+- **`PARITY.md` sign-off table** now uses the same layout as `VERIFICATION.md` (Name, Role, Date, Decision), so the canvas can read it.
+- **README order:** the flow is now shown as … → verify → harden → parity.
+
+### Verified
+
+- 2 new canvas tests: the next step, the step list, staleness and attention for a stale, failing, unsigned and signed report; the reader on real report files, including a damaged one.
+- The parity test now checks the sign-off layout.
+
 ## 1.1.0 (2026-10-16)
 
 ### Added
