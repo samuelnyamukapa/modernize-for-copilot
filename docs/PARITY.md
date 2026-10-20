@@ -84,7 +84,30 @@ Set a level for the whole system in `config.json`. Then loosen it for chosen pat
 
 ## Limits
 
-- Covers HTTP and SOAP only. Queues, workers, files and databases are not covered yet; see the parity-first toolkit plan.
+- Covers HTTP and SOAP only. For other boundaries, see the next section.
 - OpenAPI contracts must be JSON when served live. For a YAML file on disk, use `oasdiff breaking`.
 - Bodies over 5 MB are compared on their first 5 MB only. The report says when this happens.
 - Has passed its automated tests (two local servers), but has not yet run against a real migrated system.
+
+## Next: the Complete Migration Toolkit
+
+`/modernize:parity` answers one question once: does the new system answer like the old one at its HTTP and SOAP boundary? For more than that, use the [Complete Migration Toolkit](https://github.com/samuelnyamukapa/complete-migration-toolkit) (`cmtk`). It is a separate plugin, built on the same ideas: contracts locked by default, approved drift only, and only a person signs. It adds:
+
+- **Every pull request:** the same comparison, run in CI, with a report kept as evidence.
+- **Other boundaries:** through adapters. The eShop pilot compared the catalog class library on .NET Framework and .NET 8 this way.
+- **An AI tester:**
+  - `/cmtk:plan` drafts a test plan and cases from stories or business rules;
+  - `/cmtk:explore` explores within a charter and a budget;
+  - `/cmtk:triage` sorts differences into noise, drift and defects;
+  - `/cmtk:defects` drafts defect reports.
+
+  Every draft and proposal waits for a person's review.
+
+To install it in Copilot CLI:
+
+```sh
+copilot plugin marketplace add samuelnyamukapa/complete-migration-toolkit
+copilot plugin install cmtk@complete-migration-toolkit
+```
+
+In the Copilot app, add the marketplace `samuelnyamukapa/complete-migration-toolkit` under Customize › Plugins, then install **cmtk**. Then start with `/cmtk:test`. The plugin needs Node.js 22.5 or later.

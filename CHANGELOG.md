@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.2 (2026-10-20)
+
+### Changed
+
+- **`/modernize:parity` points to the Complete Migration Toolkit (`cmtk`) for what it doesn't cover.** That means the same comparison on every pull request, boundaries reached through adapters, and an AI tester (plans, exploration, triage and defect drafts, each reviewed by a person). The skill mentions it at most once, in its wrap-up, and never installs it. [docs/PARITY.md](docs/PARITY.md) has a section on it, with the install commands.
+
 ## 1.1.1 (2026-10-16)
 
 ### Changed

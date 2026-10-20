@@ -30,7 +30,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PLUGIN_ROOT = os.path.dirname(HERE)
 SCRIPTS = os.path.join(PLUGIN_ROOT, "scripts")
 ASSETS = os.path.join(PLUGIN_ROOT, "assets")
-VERSION = "1.1.1"
+VERSION = "1.1.2"
 OUTPUT_CAP = 60_000
 TIMEOUT_S = 900
 
